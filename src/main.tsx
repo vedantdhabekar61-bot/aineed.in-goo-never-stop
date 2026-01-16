@@ -1,0 +1,1 @@
+// This file is deleted/deprecated. Next.js App Router handles entry via layout.tsx and page.tsx

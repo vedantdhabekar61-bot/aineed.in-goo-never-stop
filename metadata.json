@@ -1,0 +1,5 @@
+{
+  "name": "AI Tool Directory",
+  "description": "An intelligent assistant that helps you find the perfect AI tools for your specific problems using Google Search and Gemini.",
+  "requestFramePermissions": []
+}
