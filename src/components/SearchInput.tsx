@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
-import { SearchIcon, ArrowRightIcon } from './Icons';
+import { SearchIcon } from './Icons';
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
@@ -22,32 +22,31 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, isLoading }) => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto relative group">
-      <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-      <div className="relative flex items-center bg-surface rounded-lg shadow-xl border border-slate-700">
-        <div className="pl-4 text-slate-400">
-          <SearchIcon className="w-6 h-6" />
-        </div>
+    <div className="w-full max-w-[800px] mx-auto relative z-20">
+      <div className="relative flex items-center bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 hover:border-slate-200 transition-all p-2">
+        
         <input
           type="text"
-          className="w-full bg-transparent text-white p-4 pl-3 focus:outline-none placeholder-slate-500 text-lg"
-          placeholder="Describe your problem (e.g., 'I need to generate royalty-free music')"
+          className="w-full bg-transparent text-slate-800 p-4 pl-6 focus:outline-none placeholder-slate-400 text-lg font-medium"
+          placeholder="e.g., I spend 4 hours a week editing podcast clips..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isLoading}
         />
+        
         <button
           onClick={handleSearch}
           disabled={isLoading || !value.trim()}
-          className={`mr-2 p-2 rounded-md transition-colors ${
-            value.trim() && !isLoading
-              ? 'bg-indigo-600 text-white hover:bg-indigo-500' 
-              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-          }`}
-          aria-label="Search"
+          className={`
+            flex items-center space-x-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 shrink-0
+            ${value.trim() && !isLoading 
+              ? 'bg-[#5D5CDE] hover:bg-[#4b4ac2] text-white shadow-lg shadow-indigo-500/30' 
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'}
+          `}
         >
-          <ArrowRightIcon className="w-6 h-6" />
+          <SearchIcon className="w-5 h-5" />
+          <span>Find AI</span>
         </button>
       </div>
     </div>

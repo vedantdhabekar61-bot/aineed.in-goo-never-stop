@@ -10,21 +10,21 @@ interface ResultCardProps {
 const ResultCard: React.FC<ResultCardProps> = ({ tool, index }) => {
   return (
     <div 
-      className="group relative bg-surface border border-slate-700 rounded-xl p-6 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 flex flex-col h-full"
+      className="group relative bg-white border border-slate-200 rounded-2xl p-8 hover:border-[#5D5CDE]/30 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 flex flex-col h-full"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 group-hover:bg-indigo-500/20 transition-colors">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#5D5CDE] group-hover:bg-[#5D5CDE] group-hover:text-white transition-colors duration-300">
             <SparklesIcon className="w-6 h-6" />
           </div>
-          <h3 className="text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">
+          <h3 className="text-xl font-bold text-slate-900 leading-tight">
             {tool.name}
           </h3>
         </div>
       </div>
       
-      <p className="text-slate-400 mb-6 flex-grow leading-relaxed">
+      <p className="text-slate-600 mb-8 flex-grow leading-relaxed font-medium">
         {tool.description}
       </p>
       
@@ -32,7 +32,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ tool, index }) => {
         href={tool.url} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center w-full py-3 px-4 bg-slate-700/50 hover:bg-indigo-600 text-indigo-300 hover:text-white rounded-lg transition-all duration-200 font-medium group-hover:translate-y-[-2px]"
+        className="mt-auto inline-flex items-center justify-center w-full py-3.5 px-4 bg-slate-50 hover:bg-[#5D5CDE] text-slate-700 hover:text-white rounded-xl transition-all duration-200 font-semibold text-sm group-hover:shadow-lg group-hover:shadow-indigo-500/20"
       >
         <span>Visit Website</span>
         <ExternalLinkIcon className="w-4 h-4 ml-2" />

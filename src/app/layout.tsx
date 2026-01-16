@@ -2,8 +2,8 @@ import React from "react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "AI Tool Directory",
-  description: "Find the perfect AI tools for your specific problems.",
+  title: "aineed.in - Find the AI you need",
+  description: "Describe your workflow bottleneck, and our AI engine will match you with the perfect tools to solve it.",
 };
 
 export default function RootLayout({
@@ -21,14 +21,16 @@ export default function RootLayout({
             tailwind.config = {
               theme: {
                 extend: {
-                  colors: {
-                    background: '#0f172a',
-                    surface: '#1e293b',
-                    primary: '#6366f1',
-                    secondary: '#a855f7',
+                  fontFamily: {
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
                   },
-                  animation: {
-                    'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                  colors: {
+                    primary: '#5D5CDE', // Purple/Indigo from screenshot
+                    secondary: '#1F1F1F', // Dark text
+                  },
+                  boxShadow: {
+                    'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    'glow': '0 0 20px rgba(93, 92, 222, 0.3)',
                   }
                 },
               },
@@ -37,15 +39,20 @@ export default function RootLayout({
           }}
         />
         <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          
           body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #ffffff;
+            color: #1F1F1F;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
           }
-          ::-webkit-scrollbar { width: 8px; }
-          ::-webkit-scrollbar-track { background: #0f172a; }
-          ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-          ::-webkit-scrollbar-thumb:hover { background: #475569; }
+          
+          /* Custom selection color */
+          ::selection {
+            background-color: #5D5CDE;
+            color: white;
+          }
         `}</style>
       </head>
       <body>{children}</body>
