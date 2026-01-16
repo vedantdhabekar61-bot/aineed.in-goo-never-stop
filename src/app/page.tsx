@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { User } from '@supabase/supabase-js';
 import { ToolRecommendation, GroundingSource } from '../types';
 import SearchInput from '../components/SearchInput';
 import ResultCard from '../components/ResultCard';
+import AuthModal from '../components/AuthModal';
 import { LoaderIcon, SparklesIcon, ExternalLinkIcon } from '../components/Icons';
 
 const CATEGORIES = [
@@ -18,13 +21,42 @@ const CATEGORIES = [
 ];
 
 export default function Page() {
+  // Auth State
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+
+  // App State
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ToolRecommendation[] | null>(null);
   const [sources, setSources] = useState<GroundingSource[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    // 1. Initial Session Check (Restores session on refresh)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setAuthChecking(false);
+    });
+
+    // 2. Listen for Real-time Auth Changes (Login/Logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setAuthChecking(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const handleSearch = async (searchQuery: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     setQuery(searchQuery);
     setLoading(true);
     setError(null);
@@ -56,16 +88,33 @@ export default function Page() {
 
   const handleCategoryClick = (category: string) => {
     if (category === "All Tools") return;
+    if (!user) {
+        setIsAuthModalOpen(true);
+        return;
+    }
     handleSearch(`Find me the best AI tools for ${category}`);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setResults(null);
+    setSources(null);
+    setQuery('');
   };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans">
       
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
+
       {/* Navigation */}
-      <nav className="w-full border-b border-slate-100/50 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full border-b border-slate-100/50 bg-white/80 backdrop-blur-md sticky top-0 z-40">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
             <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-[#5D5CDE]">
               <SparklesIcon className="w-5 h-5" />
             </div>
@@ -75,10 +124,30 @@ export default function Page() {
           <div className="hidden md:flex items-center space-x-8">
             <a href="#" className="text-slate-600 hover:text-[#5D5CDE] font-medium text-sm transition-colors">Discover</a>
             <a href="#" className="text-slate-600 hover:text-[#5D5CDE] font-medium text-sm transition-colors">Categories</a>
-            <a href="#" className="text-slate-600 hover:text-[#5D5CDE] font-medium text-sm transition-colors">Submit Tool</a>
-            <a href="#" className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-800 transition-colors">
-              Sign In
-            </a>
+            
+            {authChecking ? (
+              // Loading placeholder for auth state
+              <div className="w-20 h-9 bg-slate-100 rounded-full animate-pulse"></div>
+            ) : user ? (
+              <div className="flex items-center space-x-4">
+                 <span className="text-sm font-medium text-slate-500 truncate max-w-[150px]">
+                   {user.email}
+                 </span>
+                 <button 
+                  onClick={handleSignOut}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
+                 >
+                   Sign Out
+                 </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsAuthModalOpen(true)}
+                className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -100,7 +169,14 @@ export default function Page() {
             Describe your workflow bottleneck, and our AI engine will match you with the perfect tools to solve it.
           </p>
 
-          <SearchInput onSearch={handleSearch} isLoading={loading} />
+          <div className="w-full">
+            <SearchInput 
+                onSearch={handleSearch} 
+                onShowAuth={() => setIsAuthModalOpen(true)}
+                isLoading={loading} 
+                user={user}
+            />
+          </div>
 
           {/* Categories Pills */}
           <div className="mt-10 flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
