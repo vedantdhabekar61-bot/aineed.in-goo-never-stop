@@ -14,6 +14,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4113034727076146"
+          crossOrigin="anonymous"
+        ></script>
         <script src="https://cdn.tailwindcss.com"></script>
         <script
           dangerouslySetInnerHTML={{
