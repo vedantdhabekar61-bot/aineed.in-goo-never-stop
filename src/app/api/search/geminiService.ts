@@ -1,13 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { ToolRecommendation, ToolResponse, GroundingSource } from "../../../types";
 
-const apiKey = process.env.API_KEY;
-
-if (!apiKey) {
-  throw new Error("API_KEY is missing from environment variables");
-}
-
-const ai = new GoogleGenAI({ apiKey });
+// Always use a named parameter and direct reference to process.env.API_KEY
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const MODEL_NAME = 'gemini-3-flash-preview';
 
@@ -60,6 +55,7 @@ export async function runGeminiSearch(problemDescription: string): Promise<{ rec
       });
     }
 
+    // Access the .text property directly (do not call as a method)
     const textResponse = response.text;
     
     if (!textResponse) {
