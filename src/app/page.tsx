@@ -4,10 +4,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
-import { ToolRecommendation, GroundingSource } from '../types';
+import { ToolRecommendation, GroundingSource, WorkflowPlan } from '../types';
 import SearchInput from '../components/SearchInput';
 import ResultCard from '../components/ResultCard';
 import AuthModal from '../components/AuthModal';
+import WorkflowCanvas from '../components/WorkflowCanvas';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { SparklesIcon, ExternalLinkIcon, XIcon } from '../components/Icons';
 
@@ -37,6 +38,12 @@ export default function Page() {
   const [savedTools, setSavedTools] = useState<ToolRecommendation[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Workflow Canvas state
+  const [workflowPlan, setWorkflowPlan] = useState<WorkflowPlan | null>(null);
+  const [isWorkflowLoading, setIsWorkflowLoading] = useState(false);
+  const [activeWorkflowTool, setActiveWorkflowTool] = useState<ToolRecommendation | null>(null);
+  const workflowRef = useRef<HTMLDivElement>(null);
+
   // Typewriter effect state
   const [promptIndex, setPromptIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
@@ -58,7 +65,6 @@ export default function Page() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Typewriter Loop
   useEffect(() => {
     const handleType = () => {
       const fullText = PROMPTS[promptIndex];
@@ -94,7 +100,35 @@ export default function Page() {
     } else {
       setSavedTools(prev => [...prev, tool]);
       await supabase.from('saved_tools').insert([{ user_id: user.id, ...tool }]);
-      setIsSidebarOpen(true); // Open toolkit to show success
+      setIsSidebarOpen(true);
+    }
+  };
+
+  const handleAnalyzeWorkflow = async (tool: ToolRecommendation) => {
+    if (!user) { setIsAuthModalOpen(true); return; }
+    setActiveWorkflowTool(tool);
+    setIsWorkflowLoading(true);
+    setWorkflowPlan(null);
+    
+    // Scroll to workflow canvas
+    setTimeout(() => {
+      workflowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+
+    try {
+      const response = await fetch("/api/workflow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problem: query, tool }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Workflow analysis failed");
+      setWorkflowPlan(data.plan);
+    } catch (err: any) {
+      console.error(err);
+      setError("Failed to build workflow plan.");
+    } finally {
+      setIsWorkflowLoading(false);
     }
   };
 
@@ -103,6 +137,10 @@ export default function Page() {
     setQuery(searchQuery);
     setLoading(true);
     setError(null);
+    setResults(null);
+    setWorkflowPlan(null);
+    setActiveWorkflowTool(null);
+    
     try {
       const response = await fetch("/api/search", {
         method: "POST",
@@ -152,9 +190,11 @@ export default function Page() {
                       <XIcon className="w-4 h-4" />
                     </button>
                   </div>
-                  <a href={tool.url} target="_blank" className="text-[11px] font-bold text-[#5D5CDE] hover:underline flex items-center">
-                    Launch <ExternalLinkIcon className="w-2 h-2 ml-1" />
-                  </a>
+                  <div className="flex items-center gap-3">
+                    <a href={tool.url} target="_blank" className="text-[11px] font-bold text-[#5D5CDE] hover:underline flex items-center">
+                      Launch <ExternalLinkIcon className="w-2 h-2 ml-1" />
+                    </a>
+                  </div>
                 </div>
               ))
             )}
@@ -256,9 +296,23 @@ export default function Page() {
                     tool={tool} 
                     index={idx} 
                     onSave={handleSaveTool}
+                    onAnalyze={handleAnalyzeWorkflow}
                     isSaved={savedTools.some(t => t.name === tool.name)}
                   />
                 ))}
+              </div>
+
+              {/* Workflow Canvas Zone */}
+              <div ref={workflowRef}>
+                <WorkflowCanvas 
+                  plan={workflowPlan} 
+                  isLoading={isWorkflowLoading} 
+                  activeTool={activeWorkflowTool}
+                  onClear={() => {
+                    setWorkflowPlan(null);
+                    setActiveWorkflowTool(null);
+                  }}
+                />
               </div>
             </div>
           ) : null}

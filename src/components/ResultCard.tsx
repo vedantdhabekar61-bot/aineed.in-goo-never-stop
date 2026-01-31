@@ -3,16 +3,17 @@
 
 import React from 'react';
 import { ToolRecommendation } from '../types';
-import { ExternalLinkIcon, SparklesIcon } from './Icons';
+import { ExternalLinkIcon, SparklesIcon, ArrowRightIcon } from './Icons';
 
 interface ResultCardProps {
   tool: ToolRecommendation;
   index: number;
   onSave?: (tool: ToolRecommendation) => void;
+  onAnalyze?: (tool: ToolRecommendation) => void;
   isSaved?: boolean;
 }
 
-const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onSave, isSaved }) => {
+const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onSave, onAnalyze, isSaved }) => {
   return (
     <div 
       className="group relative bg-white border border-slate-200 rounded-2xl p-8 hover:border-[#5D5CDE]/40 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(93,92,222,0.06)] flex flex-col h-full overflow-hidden"
@@ -21,7 +22,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onSave, isSaved })
       {/* Save Ribbon */}
       <button 
         onClick={() => onSave?.(tool)}
-        className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 ${
+        className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 z-10 ${
           isSaved 
             ? 'bg-[#5D5CDE] text-white' 
             : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
@@ -56,15 +57,25 @@ const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onSave, isSaved })
         </div>
       )}
       
-      <a 
-        href={tool.url} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="mt-auto inline-flex items-center justify-center w-full py-3.5 px-4 bg-slate-900 hover:bg-[#5D5CDE] text-white rounded-xl transition-all duration-300 font-bold text-sm shadow-sm group-hover:shadow-indigo-500/25"
-      >
-        <span>Get Started</span>
-        <ExternalLinkIcon className="w-4 h-4 ml-2" />
-      </a>
+      <div className="mt-auto space-y-3">
+        <button 
+          onClick={() => onAnalyze?.(tool)}
+          className="w-full py-3 px-4 bg-indigo-50 hover:bg-indigo-100 text-[#5D5CDE] rounded-xl transition-all duration-300 font-bold text-sm flex items-center justify-center gap-2 border border-indigo-100"
+        >
+          <span>Blueprint Workflow</span>
+          <ArrowRightIcon className="w-4 h-4" />
+        </button>
+        
+        <a 
+          href={tool.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center w-full py-3 px-4 bg-slate-900 hover:bg-[#5D5CDE] text-white rounded-xl transition-all duration-300 font-bold text-sm shadow-sm group-hover:shadow-indigo-500/25"
+        >
+          <span>Visit Website</span>
+          <ExternalLinkIcon className="w-4 h-4 ml-2" />
+        </a>
+      </div>
     </div>
   );
 };

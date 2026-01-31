@@ -4,7 +4,17 @@ export interface ToolRecommendation {
   name: string;
   description: string;
   url: string;
-  reasoning?: string; // AI logic explanation
+  reasoning?: string;
+}
+
+export interface WorkflowPlan {
+  toolName: string;
+  steps: {
+    action: string;
+    description: string;
+  }[];
+  uploadGuide: string;
+  promptTemplate: string;
 }
 
 export interface GroundingSource {
