@@ -1,7 +1,10 @@
+
 export interface ToolRecommendation {
+  id?: string;
   name: string;
   description: string;
   url: string;
+  reasoning?: string; // AI logic explanation
 }
 
 export interface GroundingSource {

@@ -1,195 +1,228 @@
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { ToolRecommendation, GroundingSource } from '../types';
 import SearchInput from '../components/SearchInput';
 import ResultCard from '../components/ResultCard';
 import AuthModal from '../components/AuthModal';
-import { LoaderIcon, SparklesIcon, ExternalLinkIcon } from '../components/Icons';
+import { SkeletonGrid } from '../components/SkeletonLoader';
+import { SparklesIcon, ExternalLinkIcon, XIcon } from '../components/Icons';
 
 const CATEGORIES = [
-  "All Tools",
-  "Video Automation",
-  "AI Coding",
-  "SaaS Growth",
-  "Copywriting",
-  "Design & Art",
-  "Productivity",
-  "Marketing"
+  "All Tools", "Video Automation", "AI Coding", "SaaS Growth", "Copywriting", "Design & Art", "Productivity"
+];
+
+const PROMPTS = [
+  "I want to create AI influencers for Instagram",
+  "Help me automate my YouTube clip creation",
+  "I need an AI that can write code from screenshots",
+  "How can I grow my SaaS with AI SEO?",
+  "I spend 5 hours a week manually tagging images..."
 ];
 
 export default function Page() {
-  // Auth State
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
-
-  // App State
+  
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ToolRecommendation[] | null>(null);
   const [sources, setSources] = useState<GroundingSource[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [savedTools, setSavedTools] = useState<ToolRecommendation[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Typewriter effect state
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    // 1. Initial Session Check (Restores session on refresh)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setAuthChecking(false);
+      if (session?.user) fetchSavedTools(session.user.id);
     });
 
-    // 2. Listen for Real-time Auth Changes (Login/Logout)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setAuthChecking(false);
+      if (session?.user) fetchSavedTools(session.user.id);
+      else setSavedTools([]);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSearch = async (searchQuery: string) => {
-    if (!user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
+  // Typewriter Loop
+  useEffect(() => {
+    const handleType = () => {
+      const fullText = PROMPTS[promptIndex];
+      setCurrentText(isDeleting 
+        ? fullText.substring(0, currentText.length - 1)
+        : fullText.substring(0, currentText.length + 1)
+      );
 
+      if (!isDeleting && currentText === fullText) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && currentText === "") {
+        setIsDeleting(false);
+        setPromptIndex((prev) => (prev + 1) % PROMPTS.length);
+      }
+    };
+
+    const timer = setTimeout(handleType, isDeleting ? 30 : 60);
+    return () => clearTimeout(timer);
+  }, [currentText, isDeleting, promptIndex]);
+
+  const fetchSavedTools = async (userId: string) => {
+    const { data } = await supabase.from('saved_tools').select('*').eq('user_id', userId);
+    if (data) setSavedTools(data as any);
+  };
+
+  const handleSaveTool = async (tool: ToolRecommendation) => {
+    if (!user) { setIsAuthModalOpen(true); return; }
+    
+    const isAlreadySaved = savedTools.some(t => t.name === tool.name);
+    if (isAlreadySaved) {
+      setSavedTools(prev => prev.filter(t => t.name !== tool.name));
+      await supabase.from('saved_tools').delete().match({ user_id: user.id, name: tool.name });
+    } else {
+      setSavedTools(prev => [...prev, tool]);
+      await supabase.from('saved_tools').insert([{ user_id: user.id, ...tool }]);
+      setIsSidebarOpen(true); // Open toolkit to show success
+    }
+  };
+
+  const handleSearch = async (searchQuery: string) => {
+    if (!user) { setIsAuthModalOpen(true); return; }
     setQuery(searchQuery);
     setLoading(true);
     setError(null);
-    setResults(null);
-    setSources(null);
-
     try {
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: searchQuery }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch results");
-      }
-
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Search failed");
       setResults(data.result.recommendations);
       setSources(data.result.sources);
-
     } catch (err: any) {
-      setError(err.message || "Something went wrong while searching.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCategoryClick = (category: string) => {
-    if (category === "All Tools") return;
-    if (!user) {
-        setIsAuthModalOpen(true);
-        return;
-    }
-    handleSearch(`Find me the best AI tools for ${category}`);
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setResults(null);
-    setSources(null);
-    setQuery('');
-  };
-
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans">
-      
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
+    <div className="min-h-screen bg-[#FDFDFF] text-slate-900 font-sans selection:bg-[#5D5CDE] selection:text-white">
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
-      {/* Navigation */}
-      <nav className="w-full border-b border-slate-100/50 bg-white/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-[#5D5CDE]">
-              <SparklesIcon className="w-5 h-5" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">aineed.in</span>
+      {/* Persistence Sidebar (Toolkit) */}
+      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-2xl z-50 transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="p-6 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              My AI Toolkit
+            </h2>
+            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-slate-50 rounded-full">
+              <XIcon className="w-5 h-5" />
+            </button>
           </div>
-
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-slate-600 hover:text-[#5D5CDE] font-medium text-sm transition-colors">Discover</a>
-            <a href="#" className="text-slate-600 hover:text-[#5D5CDE] font-medium text-sm transition-colors">Categories</a>
-            
-            {authChecking ? (
-              // Loading placeholder for auth state
-              <div className="w-20 h-9 bg-slate-100 rounded-full animate-pulse"></div>
-            ) : user ? (
-              <div className="flex items-center space-x-4">
-                 <span className="text-sm font-medium text-slate-500 truncate max-w-[150px]">
-                   {user.email}
-                 </span>
-                 <button 
-                  onClick={handleSignOut}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
-                 >
-                   Sign Out
-                 </button>
+          
+          <div className="flex-grow overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+            {savedTools.length === 0 ? (
+              <div className="text-center py-20 text-slate-400">
+                <SparklesIcon className="w-10 h-10 mx-auto mb-4 opacity-20" />
+                <p className="text-sm">Save tools from results to build your workflow.</p>
               </div>
             ) : (
-              <button 
-                onClick={() => setIsAuthModalOpen(true)}
-                className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
-              >
-                Sign In
-              </button>
+              savedTools.map((tool, i) => (
+                <div key={i} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-all group animate-in slide-in-from-right-4 duration-300" style={{animationDelay: `${i*50}ms`}}>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-bold text-sm text-slate-900 truncate max-w-[150px]">{tool.name}</span>
+                    <button onClick={() => handleSaveTool(tool)} className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition-opacity">
+                      <XIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <a href={tool.url} target="_blank" className="text-[11px] font-bold text-[#5D5CDE] hover:underline flex items-center">
+                    Launch <ExternalLinkIcon className="w-2 h-2 ml-1" />
+                  </a>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <button className="mt-8 w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors">
+            Export My Stack (.csv)
+          </button>
+        </div>
+      </div>
+
+      <nav className="w-full border-b border-slate-100/50 bg-white/70 backdrop-blur-xl sticky top-0 z-40">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => window.location.reload()}>
+            <div className="w-9 h-9 bg-[#5D5CDE] rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
+              <SparklesIcon className="w-5 h-5" />
+            </div>
+            <span className="text-xl font-black tracking-tight text-slate-900">aineed.in</span>
+          </div>
+
+          <div className="flex items-center space-x-6">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="relative p-2 text-slate-600 hover:text-[#5D5CDE] transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              {savedTools.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-[#5D5CDE] rounded-full ring-2 ring-white"></span>}
+            </button>
+            {user && (
+              <button onClick={() => supabase.auth.signOut()} className="text-sm font-bold text-slate-400 hover:text-slate-600">Sign Out</button>
+            )}
+            {!user && !authChecking && (
+              <button onClick={() => setIsAuthModalOpen(true)} className="px-6 py-2.5 bg-slate-900 text-white rounded-full text-sm font-bold hover:shadow-xl transition-all">Join for Free</button>
             )}
           </div>
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-16 md:py-24 flex flex-col min-h-screen relative">
-        
-        {/* Hero Section */}
-        <div className={`transition-all duration-700 ease-out flex flex-col items-center text-center max-w-4xl mx-auto ${results ? 'mb-12' : 'mb-20'}`}>
-          
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1]">
-            <span className="text-slate-900">Find the</span>
-            <br className="md:hidden" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#5D5CDE] via-[#3B82F6] to-[#06B6D4] ml-3 md:ml-4">
-               AI you need.
-            </span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-medium">
-            Describe your workflow bottleneck, and our AI engine will match you with the perfect tools to solve it.
-          </p>
+      <main className="container mx-auto px-4 py-20 flex flex-col items-center">
+        {/* Glass Hero */}
+        <div className={`relative w-full max-w-4xl p-10 md:p-16 rounded-[40px] border border-slate-200/60 bg-white/40 backdrop-blur-2xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.08)] text-center transition-all duration-1000 ${results ? 'mb-12 scale-[0.95]' : 'mb-24'}`}>
+          <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-          <div className="w-full">
-            <SearchInput 
-                onSearch={handleSearch} 
-                onShowAuth={() => setIsAuthModalOpen(true)}
-                isLoading={loading} 
-                user={user}
-            />
+          <h1 className="text-4xl md:text-6xl font-black mb-8 leading-[1.1] tracking-tight text-slate-900">
+            Fix your bottlenecks. <br/>
+            <span className="text-[#5D5CDE]">Find the exact AI.</span>
+          </h1>
+
+          <div className="h-12 flex items-center justify-center mb-10 overflow-hidden">
+            <p className="text-lg md:text-xl text-slate-400 font-medium">
+              Try: <span className="text-[#5D5CDE] border-r-2 border-[#5D5CDE] pr-1 animate-pulse">{currentText}</span>
+            </p>
           </div>
 
-          {/* Categories Pills */}
-          <div className="mt-10 flex flex-wrap justify-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
+          <SearchInput 
+            onSearch={handleSearch} 
+            onShowAuth={() => setIsAuthModalOpen(true)}
+            isLoading={loading} 
+            user={user}
+          />
+
+          <div className="mt-12 flex flex-wrap justify-center gap-3">
             {CATEGORIES.map((cat, idx) => (
               <button
                 key={idx}
-                onClick={() => handleCategoryClick(cat)}
-                className={`
-                  px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border
-                  ${idx === 0 
-                    ? 'bg-[#5D5CDE] text-white border-[#5D5CDE] shadow-md shadow-indigo-500/20' 
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-[#5D5CDE] hover:text-[#5D5CDE] hover:shadow-sm'}
-                `}
+                onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
+                className="px-5 py-2 rounded-full text-xs font-bold border border-slate-200 bg-white hover:border-[#5D5CDE] hover:text-[#5D5CDE] transition-all hover:shadow-sm"
               >
                 {cat}
               </button>
@@ -197,89 +230,48 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
-            <div className="relative">
-              <div className="absolute inset-0 bg-[#5D5CDE] blur-xl opacity-20 animate-pulse"></div>
-              <LoaderIcon className="w-12 h-12 text-[#5D5CDE] animate-spin relative z-10" />
+        {/* Results Area */}
+        <div className="w-full max-w-6xl">
+          {loading ? (
+            <SkeletonGrid />
+          ) : error ? (
+            <div className="bg-red-50 p-6 rounded-2xl border border-red-100 text-red-600 text-center font-bold">
+              {error}
+              <button onClick={() => handleSearch(query)} className="block mx-auto mt-2 underline">Retry</button>
             </div>
-            <p className="mt-6 text-slate-500 text-lg font-medium animate-pulse">
-              Analysing your workflow needs...
-            </p>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="max-w-3xl mx-auto w-full bg-red-50 border border-red-100 rounded-2xl p-6 text-center animate-in fade-in slide-in-from-bottom-4">
-            <p className="text-red-600 font-medium">{error}</p>
-            <button 
-              onClick={() => handleSearch(query)}
-              className="mt-4 text-sm text-red-600 hover:text-red-800 underline underline-offset-4"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {/* Results Grid */}
-        {results && !loading && (
-          <div className="w-full max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
-             <div className="flex items-end justify-between mb-8 border-b border-slate-100 pb-4">
-               <div>
-                  <h2 className="text-3xl font-bold text-slate-900">Recommended Tools</h2>
-                  <p className="text-slate-500 mt-1">Based on your specific requirements</p>
-               </div>
-               <span className="text-sm font-medium px-3 py-1 bg-slate-100 rounded-full text-slate-600">{results.length} results</span>
-             </div>
-             
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-               {results.map((tool, index) => (
-                 <ResultCard key={index} tool={tool} index={index} />
-               ))}
-             </div>
-
-             {results.length === 0 && (
-               <div className="text-center py-20 bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
-                 <p className="text-slate-500 font-medium text-lg">No specific tools found. Try describing your problem differently.</p>
-               </div>
-             )}
-
-             {sources && sources.length > 0 && (
-                <div className="mt-16 pt-8 border-t border-slate-100">
-                    <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 flex items-center">
-                        Verified Sources
-                    </h3>
-                    <div className="flex flex-wrap gap-3">
-                        {sources.map((source, idx) => (
-                            <a 
-                              key={idx}
-                              href={source.uri}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-2 px-3 py-1.5 bg-slate-50 hover:bg-white border border-slate-200 hover:border-slate-300 rounded-lg text-xs text-slate-600 hover:text-slate-900 transition-all shadow-sm"
-                            >
-                                <span className="truncate max-w-[200px]">{source.title}</span>
-                                <ExternalLinkIcon className="w-3 h-3 text-slate-400" />
-                            </a>
-                        ))}
-                    </div>
+          ) : results ? (
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <div className="flex items-center justify-between mb-12 border-b border-slate-100 pb-6">
+                <h2 className="text-2xl font-black">Identified Solutions</h2>
+                <div className="flex gap-2">
+                   {sources?.slice(0, 3).map((s, i) => (
+                     <a key={i} href={s.uri} target="_blank" className="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-bold text-slate-500 hover:bg-slate-200 transition-colors truncate max-w-[120px]">{s.title}</a>
+                   ))}
                 </div>
-             )}
-          </div>
-        )}
-
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {results.map((tool, idx) => (
+                  <ResultCard 
+                    key={idx} 
+                    tool={tool} 
+                    index={idx} 
+                    onSave={handleSaveTool}
+                    isSaved={savedTools.some(t => t.name === tool.name)}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </main>
-      
-      {/* Footer */}
-      <footer className="w-full py-8 border-t border-slate-100 mt-auto bg-white">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-          <p>&copy; {new Date().getFullYear()} aineed.in. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-[#5D5CDE]">Privacy</a>
-            <a href="#" className="hover:text-[#5D5CDE]">Terms</a>
-            <a href="#" className="hover:text-[#5D5CDE]">Contact</a>
+
+      <footer className="py-20 border-t border-slate-100 bg-white mt-40">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-sm font-bold text-slate-300 mb-4 tracking-widest uppercase">The Intelligent Directory</p>
+          <div className="flex justify-center space-x-12 text-sm font-bold text-slate-400">
+            <a href="#" className="hover:text-slate-900 transition-colors">Privacy</a>
+            <a href="#" className="hover:text-slate-900 transition-colors">Twitter</a>
+            <a href="#" className="hover:text-slate-900 transition-colors">Contact</a>
           </div>
         </div>
       </footer>
