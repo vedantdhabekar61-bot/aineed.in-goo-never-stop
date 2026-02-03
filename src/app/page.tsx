@@ -37,6 +37,9 @@ export default function Page() {
   
   const [savedTools, setSavedTools] = useState<ToolRecommendation[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Track searches for guests
+  const [searchCount, setSearchCount] = useState<number>(0);
 
   // Workflow Canvas state
   const [workflowPlan, setWorkflowPlan] = useState<WorkflowPlan | null>(null);
@@ -133,7 +136,16 @@ export default function Page() {
   };
 
   const handleSearch = async (searchQuery: string) => {
-    if (!user) { setIsAuthModalOpen(true); return; }
+    // If guest, increment count. After 2 tries, force auth.
+    if (!user) {
+      const nextCount = searchCount + 1;
+      setSearchCount(nextCount);
+      if (nextCount > 2) {
+        setIsAuthModalOpen(true);
+        return;
+      }
+    }
+
     setQuery(searchQuery);
     setLoading(true);
     setError(null);
