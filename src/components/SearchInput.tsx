@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, KeyboardEvent } from 'react';
-import { SearchIcon, UserIcon } from './Icons';
+import { SearchIcon } from './Icons';
 
 interface SearchInputProps {
   onSearch: (query: string) => void;
@@ -29,13 +29,21 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoadi
   };
 
   return (
-    <div className="w-full max-w-[800px] mx-auto relative z-20">
-      <div className={`relative flex items-center bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border transition-all p-2 border-slate-100 hover:border-slate-200`}>
-        
+    <div className="w-full max-w-[850px] mx-auto relative z-20 group">
+      {/* Search Polish Container */}
+      <div className={`
+        relative flex items-center bg-[#121214]/60 backdrop-blur-2xl rounded-2xl 
+        shadow-[0_20px_50px_rgba(0,0,0,0.5),inset_0_1px_0_0_rgba(255,255,255,0.05)] 
+        border border-white/10 transition-all duration-500 p-2 
+        hover:border-primary/40 focus-within:border-primary focus-within:shadow-glow focus-within:scale-[1.01]
+      `}>
+        <div className="pl-6 pointer-events-none opacity-40 group-focus-within:opacity-100 transition-opacity">
+          <SearchIcon className="w-6 h-6 text-slate-400 group-focus-within:text-primary" />
+        </div>
         <input
           type="text"
-          className="w-full bg-transparent text-slate-800 p-4 pl-6 focus:outline-none placeholder-slate-400 text-lg font-medium"
-          placeholder="e.g., I spend 4 hours a week editing podcast clips..."
+          className="w-full bg-transparent text-slate-200 p-4 pl-4 focus:outline-none placeholder-slate-500 text-lg font-medium tracking-wide"
+          placeholder="e.g., Automate LinkedIn networking for my SaaS..."
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -46,20 +54,23 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoadi
           onClick={handleAction}
           disabled={isLoading || !value.trim()}
           className={`
-            flex items-center space-x-2 px-6 py-3.5 rounded-xl font-semibold transition-all duration-200 shrink-0
+            flex items-center space-x-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 shrink-0
             ${value.trim() && !isLoading 
-                ? 'bg-[#5D5CDE] hover:bg-[#4b4ac2] text-white shadow-lg shadow-indigo-500/30' 
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5' 
+                : 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
             }
           `}
         >
-          <SearchIcon className="w-5 h-5" />
-          <span>Find AI</span>
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          ) : (
+            <span>Find AI</span>
+          )}
         </button>
       </div>
       {!user && (
-        <p className="text-center mt-3 text-sm text-slate-500 font-medium">
-          ✨ Try searching for any workflow bottleneck.
+        <p className="text-center mt-5 text-[13px] text-slate-500 font-medium tracking-wider uppercase">
+          ✨ <span className="text-slate-400">Limited:</span> 2 free intelligent searches for guests
         </p>
       )}
     </div>

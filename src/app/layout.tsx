@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <script 
           async 
@@ -26,18 +26,21 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
             tailwind.config = {
+              darkMode: 'class',
               theme: {
                 extend: {
                   fontFamily: {
-                    sans: ['Inter', 'system-ui', 'sans-serif'],
+                    sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
                   },
                   colors: {
-                    primary: '#5D5CDE', // Purple/Indigo from screenshot
-                    secondary: '#1F1F1F', // Dark text
+                    primary: '#8B5CF6',
+                    surface: '#0A0A0B',
+                    card: '#121214',
+                    border: 'rgba(255, 255, 255, 0.08)',
                   },
                   boxShadow: {
-                    'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-                    'glow': '0 0 20px rgba(93, 92, 222, 0.3)',
+                    'glass': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+                    'glow': '0 0 40px -10px rgba(139, 92, 246, 0.3)',
                   }
                 },
               },
@@ -46,23 +49,37 @@ export default function RootLayout({
           }}
         />
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
           
           body {
-            background-color: #ffffff;
-            color: #1F1F1F;
-            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #E2E8F0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
           }
           
-          /* Custom selection color */
           ::selection {
-            background-color: #5D5CDE;
+            background-color: #8B5CF6;
             color: white;
+          }
+
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #8B5CF6;
           }
         `}</style>
       </head>
-      <body>
+      <body className="antialiased selection:bg-primary selection:text-white">
         {children}
         <Analytics />
       </body>

@@ -16,79 +16,83 @@ const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ plan, isLoading, onClea
   if (!activeTool && !isLoading) return null;
 
   return (
-    <div className="w-full mt-24 animate-in fade-in slide-in-from-bottom-12 duration-700">
-      <div className="relative p-1 border-2 border-dashed border-[#5D5CDE]/30 rounded-[40px] bg-slate-50/50">
-        <div className="bg-white rounded-[36px] shadow-2xl overflow-hidden border border-slate-200">
+    <div className="w-full mt-32 animate-in fade-in slide-in-from-bottom-20 duration-1000">
+      <div className="relative p-1.5 border-2 border-dashed border-primary/20 rounded-[48px] bg-white/[0.02]">
+        <div className="bg-[#121214] rounded-[42px] shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden border border-white/10 shadow-glass">
           
           {/* Header */}
-          <div className="px-8 py-6 bg-slate-900 text-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#5D5CDE] flex items-center justify-center">
-                <SparklesIcon className="w-4 h-4" />
+          <div className="px-10 py-8 bg-black/40 backdrop-blur-md border-b border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center text-white shadow-glow">
+                <SparklesIcon className="w-5 h-5" />
               </div>
-              <h2 className="text-lg font-bold">Workflow Blueprint: <span className="text-indigo-300">{activeTool?.name}</span></h2>
+              <h2 className="text-xl font-bold tracking-tight">Execution Blueprint: <span className="text-primary/80">{activeTool?.name}</span></h2>
             </div>
-            <button onClick={onClear} className="text-slate-400 hover:text-white transition-colors text-sm font-bold">
-              Dismiss Plan
+            <button onClick={onClear} className="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-400 hover:text-slate-100 transition-all text-[12px] font-black tracking-widest uppercase border border-white/5">
+              Dismiss
             </button>
           </div>
 
-          <div className="p-8 md:p-12">
+          <div className="p-10 md:p-16">
             {isLoading ? (
-              <div className="py-20 flex flex-col items-center justify-center">
-                <LoaderIcon className="w-12 h-12 text-[#5D5CDE] animate-spin mb-6" />
-                <p className="text-slate-500 font-bold animate-pulse uppercase tracking-widest text-xs">Architecting Solution...</p>
+              <div className="py-24 flex flex-col items-center justify-center">
+                <LoaderIcon className="w-16 h-16 text-primary animate-spin mb-8 opacity-50" />
+                <p className="text-slate-500 font-black animate-pulse uppercase tracking-[0.3em] text-[11px]">Architecting Solution...</p>
               </div>
             ) : plan ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
                 
                 {/* Steps Section */}
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="flex items-center gap-2 mb-6">
-                    <span className="px-2 py-0.5 bg-indigo-50 text-[#5D5CDE] text-[10px] font-black uppercase rounded">Execution Path</span>
+                <div className="lg:col-span-2 space-y-12">
+                  <div className="flex items-center gap-3 mb-10">
+                    <span className="px-3 py-1 bg-primary/10 text-primary text-[11px] font-black uppercase tracking-[0.1em] rounded-lg border border-primary/20">Operational Logic</span>
                   </div>
                   
                   {plan.steps.map((step, i) => (
-                    <div key={i} className="flex gap-6 group">
+                    <div key={i} className="flex gap-10 group">
                       <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-lg group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-slate-100 flex items-center justify-center font-bold text-lg shrink-0 shadow-glass group-hover:bg-primary transition-all group-hover:scale-110 duration-500 group-hover:text-white group-hover:shadow-glow">
                           {i + 1}
                         </div>
-                        {i < 2 && <div className="w-0.5 h-full bg-slate-100 my-2" />}
+                        {i < 2 && <div className="w-[1px] h-full bg-white/5 my-4" />}
                       </div>
-                      <div className="pt-1 pb-4">
-                        <h4 className="text-base font-bold text-slate-900 mb-2">{step.action}</h4>
-                        <p className="text-sm text-slate-500 leading-relaxed font-medium">{step.description}</p>
+                      <div className="pt-2 pb-6">
+                        <h4 className="text-lg font-bold text-slate-100 mb-3 tracking-tight group-hover:text-primary transition-colors">{step.action}</h4>
+                        <p className="text-[15px] text-slate-500 leading-relaxed font-medium">{step.description}</p>
                       </div>
                     </div>
                   ))}
 
-                  <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4">Input & Files</h5>
-                    <p className="text-sm text-slate-700 font-medium leading-relaxed">{plan.uploadGuide}</p>
+                  <div className="mt-16 p-8 bg-white/5 rounded-[32px] border border-white/5 shadow-glass">
+                    <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Input Architecture</h5>
+                    <p className="text-[15px] text-slate-300 font-medium leading-relaxed">{plan.uploadGuide}</p>
                   </div>
                 </div>
 
                 {/* Prompt Section */}
                 <div className="lg:col-span-1">
-                  <div className="sticky top-8 bg-[#5D5CDE]/5 border border-[#5D5CDE]/10 rounded-3xl p-8">
-                    <h5 className="text-xs font-black text-[#5D5CDE] uppercase tracking-wider mb-6 flex items-center gap-2">
-                      <SparklesIcon className="w-3 h-3" />
-                      Ready-to-use Prompt
+                  <div className="sticky top-12 bg-white/[0.03] border border-white/10 rounded-[40px] p-10 shadow-glass overflow-hidden">
+                    {/* Background glow for the prompt box */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
+                    
+                    <h5 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+                      <SparklesIcon className="w-4 h-4" />
+                      Configuration Prompt
                     </h5>
-                    <div className="bg-white border border-slate-100 rounded-xl p-4 mb-6 shadow-sm">
-                      <p className="text-xs text-slate-600 font-mono leading-relaxed whitespace-pre-wrap">
+                    <div className="bg-black/40 border border-white/5 rounded-2xl p-6 mb-8 shadow-inner relative z-10">
+                      <p className="text-[13px] text-slate-400 font-mono leading-relaxed whitespace-pre-wrap">
                         {plan.promptTemplate}
                       </p>
                     </div>
                     <button 
                       onClick={() => navigator.clipboard.writeText(plan.promptTemplate)}
-                      className="w-full py-3 bg-[#5D5CDE] hover:bg-[#4b4ac2] text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl text-[13px] font-black tracking-widest uppercase shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-3 group/copy"
                     >
-                      Copy Prompt Template
+                      Copy Logic
+                      <svg className="w-4 h-4 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </button>
-                    <p className="mt-4 text-[10px] text-slate-400 text-center font-medium">
-                      Paste this directly into {activeTool?.name}
+                    <p className="mt-6 text-[11px] text-slate-600 text-center font-bold tracking-tight">
+                      Ready for copy-paste deployment.
                     </p>
                   </div>
                 </div>
