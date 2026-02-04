@@ -420,7 +420,7 @@ export default function Page() {
                 },
                 {
                   title: "2. Grounded Matching",
-                  desc: "Gemini crawls real-time web data to find tools that aren't just popular, but actually solve your specific edge case.",
+                  desc: "Our engine utilizes real-time search grounding to pinpoint specialized AI solutions that bypass generic listings to resolve your exact operational bottleneck.",
                   icon: <SparklesIcon className="w-7 h-7" />
                 },
                 {
