@@ -34,7 +34,7 @@ export default function RootLayout({
                   },
                   colors: {
                     primary: '#8B5CF6',
-                    surface: '#0A0A0B',
+                    surface: '#050505',
                     card: '#121214',
                     border: 'rgba(255, 255, 255, 0.08)',
                   },
@@ -76,6 +76,10 @@ export default function RootLayout({
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #8B5CF6;
+          }
+          
+          .hero-glow {
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
           }
         `}</style>
       </head>

@@ -189,12 +189,74 @@ export default function Page() {
     <div className="min-h-screen bg-surface text-slate-200 font-sans selection:bg-primary selection:text-white relative">
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
+      {/* Floating Island Nav */}
+      <div className="fixed top-6 inset-x-0 z-[50] flex justify-center px-4">
+        <nav className="w-full max-w-4xl bg-[#121214]/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => switchView('search')}>
+              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-glow group-hover:rotate-12 transition-all duration-500">
+                <SparklesIcon className="w-5 h-5" />
+              </div>
+              <span className="text-lg font-black tracking-tighter text-slate-100 hidden sm:inline-block">aineed.in</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button 
+                onClick={() => switchView('search')}
+                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'search' ? 'text-slate-100' : 'text-slate-500 hover:text-slate-300'}`}
+              >
+                Find AI
+                {activeView === 'search' && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_#8B5CF6]" />
+                )}
+              </button>
+              <button 
+                onClick={() => switchView('how-it-works')}
+                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'how-it-works' ? 'text-slate-100' : 'text-slate-500 hover:text-slate-300'}`}
+              >
+                How it works
+                {activeView === 'how-it-works' && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_#8B5CF6]" />
+                )}
+              </button>
+              {user && (
+                <button 
+                  onClick={() => switchView('feed')}
+                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'text-primary' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                  <NewspaperIcon className="w-4 h-4" />
+                  Pulse Feed
+                  {activeView === 'feed' && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_#8B5CF6]" />
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="relative p-2 text-slate-400 hover:text-primary transition-all duration-300"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              {savedTools.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-[#121214] animate-pulse"></span>}
+            </button>
+            {user ? (
+              <button onClick={() => supabase.auth.signOut()} className="text-[12px] font-bold text-slate-500 hover:text-slate-300 transition-colors px-3 py-2">Sign Out</button>
+            ) : !authChecking ? (
+              <button onClick={() => setIsAuthModalOpen(true)} className="px-5 py-2.5 bg-white text-slate-900 rounded-xl text-[13px] font-black hover:bg-slate-200 transition-all">Sign Up</button>
+            ) : null}
+          </div>
+        </nav>
+      </div>
+
       {/* Persistence Sidebar (Toolkit) */}
       <div className={`fixed inset-y-0 right-0 w-80 bg-card border-l border-white/5 shadow-2xl z-[60] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-8 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-xl font-bold flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(139,92,246,0.5)]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_#8B5CF6]" />
               My AI Toolkit
             </h2>
             <button onClick={() => setIsSidebarOpen(false)} className="p-2.5 hover:bg-white/5 rounded-xl transition-all">
@@ -210,7 +272,7 @@ export default function Page() {
               </div>
             ) : (
               savedTools.map((tool, i) => (
-                <div key={i} className="p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all group animate-in slide-in-from-right-4 duration-300 shadow-glass" style={{animationDelay: `${i*50}ms`}}>
+                <div key={i} className="p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all group animate-in slide-in-from-right-4 duration-300" style={{animationDelay: `${i*50}ms`}}>
                   <div className="flex justify-between items-start mb-3">
                     <span className="font-bold text-sm text-slate-100 truncate max-w-[150px]">{tool.name}</span>
                     <button onClick={() => handleSaveTool(tool)} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-all p-1">
@@ -233,112 +295,55 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Floating Island Nav */}
-      <div className="fixed top-6 inset-x-0 z-[50] flex justify-center px-4">
-        <nav className="w-full max-w-4xl bg-[#121214]/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => switchView('search')}>
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-glow group-hover:rotate-12 transition-all duration-500">
-                <SparklesIcon className="w-5 h-5" />
-              </div>
-              <span className="text-lg font-black tracking-tighter text-slate-100 hidden sm:inline-block">aineed.in</span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              {[
-                { id: 'search', label: 'Find AI' },
-                { id: 'how-it-works', label: 'Process' },
-              ].map((view) => (
-                <button 
-                  key={view.id}
-                  onClick={() => switchView(view.id as any)}
-                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === view.id ? 'text-slate-100' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  {view.label}
-                  {activeView === view.id && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_#8B5CF6]" />
-                  )}
-                </button>
-              ))}
-              {user && (
-                <button 
-                  onClick={() => switchView('feed')}
-                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'text-primary' : 'text-slate-500 hover:text-slate-300'}`}
-                >
-                  <NewspaperIcon className="w-4 h-4" />
-                  Pulse
-                  {activeView === 'feed' && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_8px_#8B5CF6]" />
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="relative p-2 text-slate-400 hover:text-primary transition-all duration-300"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-              {savedTools.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-card animate-pulse shadow-glow"></span>}
-            </button>
-            {user ? (
-              <button onClick={() => supabase.auth.signOut()} className="text-[12px] font-bold text-slate-500 hover:text-slate-300 transition-colors px-3 py-2">Sign Out</button>
-            ) : !authChecking ? (
-              <button onClick={() => setIsAuthModalOpen(true)} className="px-5 py-2.5 bg-white text-slate-900 rounded-xl text-[13px] font-black hover:bg-slate-200 transition-all">Sign Up</button>
-            ) : null}
-          </div>
-        </nav>
-      </div>
-
       <main className="container mx-auto px-6 pt-40 pb-32 flex flex-col items-center">
         {activeView === 'search' && (
           <div className="w-full flex flex-col items-center animate-in fade-in duration-1000">
-            {/* Glow Backdrop */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none -z-10 opacity-60" />
+            {/* Hero Section with Glow Backdrop */}
+            <div className="relative w-full max-w-4xl flex flex-col items-center">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] hero-glow pointer-events-none -z-10 opacity-60" />
 
-            <div className={`relative w-full max-w-4xl text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
-              <h1 className="text-5xl md:text-7xl font-black mb-10 leading-[1.05] tracking-tight text-slate-100">
-                Fix your bottlenecks. <br/>
-                <span className="text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Find the exact AI.</span>
-              </h1>
+              <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
+                <h1 className="text-5xl md:text-7xl font-black mb-10 leading-[1.05] tracking-tight text-slate-100">
+                  Fix your bottlenecks. <br/>
+                  <span className="text-primary drop-shadow-[0_0_15px_rgba(139,92,246,0.3)]">Find the exact AI.</span>
+                </h1>
 
-              <div className="h-14 flex items-center justify-center mb-12 overflow-hidden">
-                <p className="text-xl md:text-2xl text-slate-500 font-medium tracking-wide">
-                  Try: <span className="text-primary border-r-2 border-primary/50 pr-2 animate-pulse font-bold">{currentText}</span>
-                </p>
-              </div>
-
-              <SearchInput 
-                onSearch={handleSearch} 
-                onShowAuth={() => setIsAuthModalOpen(true)}
-                isLoading={loading} 
-                user={user}
-              />
-
-              <div className="mt-20 w-full">
-                <div className="mb-6 flex items-center justify-center gap-4">
-                  <div className="h-px w-10 bg-white/5" />
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Explore Categories</span>
-                  <div className="h-px w-10 bg-white/5" />
+                <div className="h-14 flex items-center justify-center mb-12 overflow-hidden">
+                  <p className="text-xl md:text-2xl text-slate-500 font-medium tracking-wide">
+                    Try: <span className="text-primary border-r-2 border-primary/50 pr-2 animate-pulse font-bold">{currentText}</span>
+                  </p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-                  {CATEGORIES.map((cat, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
-                      className="px-6 py-3 rounded-full text-[13px] font-bold border border-white/5 bg-white/5 backdrop-blur-md hover:border-primary/40 hover:text-slate-100 hover:bg-white/10 transition-all duration-300 hover:shadow-glass active:scale-95"
+
+                <SearchInput 
+                  onSearch={handleSearch} 
+                  onShowAuth={() => setIsAuthModalOpen(true)}
+                  isLoading={loading} 
+                  user={user}
+                />
+
+                <div className="mt-20 w-full">
+                  <div className="mb-6 flex items-center justify-center gap-4">
+                    <div className="h-px w-10 bg-white/5" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Explore Categories</span>
+                    <div className="h-px w-10 bg-white/5" />
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+                    {CATEGORIES.map((cat, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
+                        className="px-6 py-3 rounded-full text-[13px] font-bold border border-white/5 bg-white/5 backdrop-blur-md hover:border-primary/40 hover:text-slate-100 hover:bg-white/10 transition-all duration-300 active:scale-95"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                    <button 
+                      onClick={() => handleSearch("Highly rated AI tools")}
+                      className="px-6 py-3 rounded-full text-[13px] font-black border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300"
                     >
-                      {cat}
+                      View Trending ✨
                     </button>
-                  ))}
-                  <button 
-                    onClick={() => handleSearch("Highly rated AI productivity tools")}
-                    className="px-6 py-3 rounded-full text-[13px] font-black border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300"
-                  >
-                    View Trending ✨
-                  </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -351,16 +356,8 @@ export default function Page() {
                 </div>
               ) : error ? (
                 <div className="bg-red-500/5 p-12 rounded-[40px] border border-red-500/10 text-red-400 text-center flex flex-col items-center">
-                  <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
-                    <XIcon className="w-8 h-8" />
-                  </div>
                   <p className="font-bold text-lg mb-6">{error}</p>
-                  <button 
-                    onClick={() => handleSearch(query)} 
-                    className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold hover:bg-white/10 transition-all text-slate-300"
-                  >
-                    Try Again
-                  </button>
+                  <button onClick={() => handleSearch(query)} className="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-bold hover:bg-white/10 transition-all text-slate-300">Try Again</button>
                 </div>
               ) : results ? (
                 <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
@@ -371,7 +368,7 @@ export default function Page() {
                     </div>
                     <div className="flex flex-wrap gap-3">
                        {sources?.slice(0, 3).map((s, i) => (
-                         <a key={i} href={s.uri} target="_blank" className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-primary/10 hover:text-primary hover:border-primary/20 transition-all truncate max-w-[180px] shadow-glass">{s.title}</a>
+                         <a key={i} href={s.uri} target="_blank" className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-primary/10 hover:text-primary transition-all truncate max-w-[180px] shadow-glass">{s.title}</a>
                        ))}
                     </div>
                   </div>
@@ -388,7 +385,6 @@ export default function Page() {
                     ))}
                   </div>
 
-                  {/* Workflow Canvas Zone */}
                   <div ref={workflowRef} className="mt-10">
                     <WorkflowCanvas 
                       plan={workflowPlan} 
@@ -403,7 +399,7 @@ export default function Page() {
                 </div>
               ) : null}
             </div>
-          </>
+          </div>
         )}
 
         {activeView === 'feed' && <Feed />}
@@ -412,7 +408,7 @@ export default function Page() {
           <div className="max-w-5xl mx-auto py-12 animate-in fade-in zoom-in-95 duration-700">
             <div className="text-center mb-20">
               <h2 className="text-5xl font-black text-slate-100 mb-8 tracking-tighter">Engineered for <span className="text-primary">Clarity.</span></h2>
-              <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">We bypass the generic listings to build you a custom execution path.</p>
+              <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">We bypass generic listings to build you a custom execution path.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -444,16 +440,25 @@ export default function Page() {
             </div>
 
             <div className="mt-24 text-center">
-              <button 
-                onClick={() => switchView('search')}
-                className="px-12 py-5 bg-primary text-white rounded-[24px] font-black text-[15px] shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 active:scale-95 transition-all tracking-wider uppercase"
-              >
+              <button onClick={() => switchView('search')} className="px-12 py-5 bg-primary text-white rounded-[24px] font-black text-[15px] shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 active:scale-95 transition-all tracking-wider uppercase">
                 Launch Search Engine
               </button>
             </div>
           </div>
         )}
       </main>
+
+      {/* Pulse Feed FAB */}
+      <button 
+        onClick={() => switchView('feed')}
+        className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-card border border-white/10 hover:border-primary/50 text-slate-100 rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group shadow-indigo-500/20"
+        title="AI Feed"
+      >
+        <NewspaperIcon className="w-7 h-7 transition-transform group-hover:rotate-6" />
+        <span className="absolute right-full mr-4 bg-primary text-white text-[10px] font-bold py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-glow">
+          Pulse Feed
+        </span>
+      </button>
 
       <footer className="py-24 border-t border-white/5 bg-[#050505] relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
