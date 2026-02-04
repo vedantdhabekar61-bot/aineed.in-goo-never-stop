@@ -10,7 +10,9 @@ import ResultCard from '../components/ResultCard';
 import AuthModal from '../components/AuthModal';
 import WorkflowCanvas from '../components/WorkflowCanvas';
 import { SkeletonGrid } from '../components/SkeletonLoader';
-import { SparklesIcon, ExternalLinkIcon, XIcon, NewspaperIcon } from '../components/Icons';
+import { Feed } from '../components/Feed';
+// Fix: Added missing SearchIcon and ArrowRightIcon to the imports from Icons component.
+import { SparklesIcon, ExternalLinkIcon, XIcon, NewspaperIcon, SearchIcon, ArrowRightIcon } from '../components/Icons';
 
 const CATEGORIES = [
   "All Tools", 
@@ -32,8 +34,11 @@ const PROMPTS = [
   "I spend 5 hours a week manually tagging images..."
 ];
 
+type AppView = 'search' | 'feed' | 'how-it-works';
+
 export default function Page() {
   const [user, setUser] = useState<User | null>(null);
+  const [activeView, setActiveView] = useState<AppView>('search');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   
@@ -156,6 +161,7 @@ export default function Page() {
     setResults(null);
     setWorkflowPlan(null);
     setActiveWorkflowTool(null);
+    setActiveView('search'); // Switch to search view if searching
     
     try {
       const response = await fetch("/api/search", {
@@ -174,20 +180,17 @@ export default function Page() {
     }
   };
 
+  const switchView = (view: AppView) => {
+    if (!user && (view === 'feed')) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setActiveView(view);
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFDFF] text-slate-900 font-sans selection:bg-[#5D5CDE] selection:text-white relative">
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
-
-      {/* FAB - Feed Button */}
-      <button 
-        className="fixed bottom-8 right-8 z-50 w-14 h-14 bg-slate-900 hover:bg-[#5D5CDE] text-white rounded-2xl shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group shadow-indigo-500/20"
-        title="AI Feed"
-      >
-        <NewspaperIcon className="w-6 h-6 transition-transform group-hover:rotate-6" />
-        <span className="absolute right-full mr-4 bg-slate-900 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          View AI Feed
-        </span>
-      </button>
 
       {/* Persistence Sidebar (Toolkit) */}
       <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-2xl z-50 transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -235,11 +238,37 @@ export default function Page() {
 
       <nav className="w-full border-b border-slate-100/50 bg-white/70 backdrop-blur-xl sticky top-0 z-40">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => window.location.reload()}>
-            <div className="w-9 h-9 bg-[#5D5CDE] rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform duration-300">
-              <SparklesIcon className="w-5 h-5" />
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => switchView('search')}>
+              <div className="w-9 h-9 bg-[#5D5CDE] rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform duration-300">
+                <SparklesIcon className="w-5 h-5" />
+              </div>
+              <span className="text-xl font-black tracking-tight text-slate-900">aineed.in</span>
             </div>
-            <span className="text-xl font-black tracking-tight text-slate-900">aineed.in</span>
+
+            <div className="hidden md:flex items-center gap-1">
+              <button 
+                onClick={() => switchView('search')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeView === 'search' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+              >
+                Find AI
+              </button>
+              <button 
+                onClick={() => switchView('how-it-works')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeView === 'how-it-works' ? 'bg-slate-100 text-slate-900' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+              >
+                How it works
+              </button>
+              {user && (
+                <button 
+                  onClick={() => switchView('feed')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'bg-indigo-50 text-[#5D5CDE]' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <NewspaperIcon className="w-4 h-4" />
+                  Pulse Feed
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-6">
@@ -262,105 +291,157 @@ export default function Page() {
       </nav>
 
       <main className="container mx-auto px-4 py-20 flex flex-col items-center">
-        {/* Glass Hero */}
-        <div className={`relative w-full max-w-4xl p-10 md:p-16 rounded-[40px] border border-slate-200/60 bg-white/40 backdrop-blur-2xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.08)] text-center transition-all duration-1000 ${results ? 'mb-12 scale-[0.95]' : 'mb-24'}`}>
-          <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+        {activeView === 'search' && (
+          <>
+            {/* Glass Hero */}
+            <div className={`relative w-full max-w-4xl p-10 md:p-16 rounded-[40px] border border-slate-200/60 bg-white/40 backdrop-blur-2xl shadow-[0_32px_120px_-20px_rgba(0,0,0,0.08)] text-center transition-all duration-1000 ${results ? 'mb-12 scale-[0.95]' : 'mb-24'}`}>
+              <div className="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-          <h1 className="text-4xl md:text-6xl font-black mb-8 leading-[1.1] tracking-tight text-slate-900">
-            Fix your bottlenecks. <br/>
-            <span className="text-[#5D5CDE]">Find the exact AI.</span>
-          </h1>
+              <h1 className="text-4xl md:text-6xl font-black mb-8 leading-[1.1] tracking-tight text-slate-900">
+                Fix your bottlenecks. <br/>
+                <span className="text-[#5D5CDE]">Find the exact AI.</span>
+              </h1>
 
-          <div className="h-12 flex items-center justify-center mb-10 overflow-hidden">
-            <p className="text-lg md:text-xl text-slate-400 font-medium">
-              Try: <span className="text-[#5D5CDE] border-r-2 border-[#5D5CDE] pr-1 animate-pulse">{currentText}</span>
-            </p>
-          </div>
+              <div className="h-12 flex items-center justify-center mb-10 overflow-hidden">
+                <p className="text-lg md:text-xl text-slate-400 font-medium">
+                  Try: <span className="text-[#5D5CDE] border-r-2 border-[#5D5CDE] pr-1 animate-pulse">{currentText}</span>
+                </p>
+              </div>
 
-          <SearchInput 
-            onSearch={handleSearch} 
-            onShowAuth={() => setIsAuthModalOpen(true)}
-            isLoading={loading} 
-            user={user}
-          />
+              <SearchInput 
+                onSearch={handleSearch} 
+                onShowAuth={() => setIsAuthModalOpen(true)}
+                isLoading={loading} 
+                user={user}
+              />
 
-          <div className="mt-14 w-full">
-            <div className="mb-4 text-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Explore Categories</span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto">
-              {CATEGORIES.map((cat, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
-                  className="px-5 py-2.5 rounded-full text-[12px] font-bold border border-slate-200 bg-white/50 backdrop-blur-sm hover:border-[#5D5CDE] hover:text-[#5D5CDE] hover:bg-white transition-all duration-300 hover:shadow-md active:scale-95"
-                >
-                  {cat}
-                </button>
-              ))}
-              <button 
-                onClick={() => handleSearch("Most popular AI tools today")}
-                className="px-5 py-2.5 rounded-full text-[12px] font-bold border border-indigo-100 bg-indigo-50/30 text-[#5D5CDE] hover:bg-indigo-50 transition-all duration-300"
-              >
-                View All ✨
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Area */}
-        <div className="w-full max-w-6xl">
-          {loading ? (
-            <SkeletonGrid />
-          ) : error ? (
-            <div className="bg-red-50 p-8 rounded-3xl border border-red-100 text-red-600 text-center flex flex-col items-center">
-              <p className="font-bold mb-4">{error}</p>
-              <button 
-                onClick={() => handleSearch(query)} 
-                className="px-6 py-2 bg-white border border-red-200 rounded-full text-xs font-bold hover:bg-red-50 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : results ? (
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 border-b border-slate-100 pb-6 gap-4">
-                <h2 className="text-2xl font-black">Identified Solutions</h2>
-                <div className="flex flex-wrap gap-2">
-                   {sources?.slice(0, 3).map((s, i) => (
-                     <a key={i} href={s.uri} target="_blank" className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 hover:bg-indigo-50 hover:text-[#5D5CDE] hover:border-indigo-100 transition-all truncate max-w-[150px]">{s.title}</a>
-                   ))}
+              <div className="mt-14 w-full">
+                <div className="mb-4 text-center">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Explore Categories</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto">
+                  {CATEGORIES.map((cat, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
+                      className="px-5 py-2.5 rounded-full text-[12px] font-bold border border-slate-200 bg-white/50 backdrop-blur-sm hover:border-[#5D5CDE] hover:text-[#5D5CDE] hover:bg-white transition-all duration-300 hover:shadow-md active:scale-95"
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                  <button 
+                    onClick={() => handleSearch("Most popular AI tools today")}
+                    className="px-5 py-2.5 rounded-full text-[12px] font-bold border border-indigo-100 bg-indigo-50/30 text-[#5D5CDE] hover:bg-indigo-50 transition-all duration-300"
+                  >
+                    View All ✨
+                  </button>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {results.map((tool, idx) => (
-                  <ResultCard 
-                    key={idx} 
-                    tool={tool} 
-                    index={idx} 
-                    onSave={handleSaveTool}
-                    onAnalyze={handleAnalyzeWorkflow}
-                    isSaved={savedTools.some(t => t.name === tool.name)}
-                  />
-                ))}
-              </div>
-
-              {/* Workflow Canvas Zone */}
-              <div ref={workflowRef}>
-                <WorkflowCanvas 
-                  plan={workflowPlan} 
-                  isLoading={isWorkflowLoading} 
-                  activeTool={activeWorkflowTool}
-                  onClear={() => {
-                    setWorkflowPlan(null);
-                    setActiveWorkflowTool(null);
-                  }}
-                />
-              </div>
             </div>
-          ) : null}
-        </div>
+
+            {/* Results Area */}
+            <div className="w-full max-w-6xl">
+              {loading ? (
+                <SkeletonGrid />
+              ) : error ? (
+                <div className="bg-red-50 p-8 rounded-3xl border border-red-100 text-red-600 text-center flex flex-col items-center">
+                  <p className="font-bold mb-4">{error}</p>
+                  <button 
+                    onClick={() => handleSearch(query)} 
+                    className="px-6 py-2 bg-white border border-red-200 rounded-full text-xs font-bold hover:bg-red-50 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : results ? (
+                <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 border-b border-slate-100 pb-6 gap-4">
+                    <h2 className="text-2xl font-black">Identified Solutions</h2>
+                    <div className="flex flex-wrap gap-2">
+                       {sources?.slice(0, 3).map((s, i) => (
+                         <a key={i} href={s.uri} target="_blank" className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 hover:bg-indigo-50 hover:text-[#5D5CDE] hover:border-indigo-100 transition-all truncate max-w-[150px]">{s.title}</a>
+                       ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {results.map((tool, idx) => (
+                      <ResultCard 
+                        key={idx} 
+                        tool={tool} 
+                        index={idx} 
+                        onSave={handleSaveTool}
+                        onAnalyze={handleAnalyzeWorkflow}
+                        isSaved={savedTools.some(t => t.name === tool.name)}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Workflow Canvas Zone */}
+                  <div ref={workflowRef}>
+                    <WorkflowCanvas 
+                      plan={workflowPlan} 
+                      isLoading={isWorkflowLoading} 
+                      activeTool={activeWorkflowTool}
+                      onClear={() => {
+                        setWorkflowPlan(null);
+                        setActiveWorkflowTool(null);
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </>
+        )}
+
+        {activeView === 'feed' && <Feed />}
+
+        {activeView === 'how-it-works' && (
+          <div className="max-w-4xl mx-auto py-10 animate-in fade-in zoom-in-95 duration-500">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">How <span className="text-[#5D5CDE]">aineed.in</span> works</h2>
+              <p className="text-lg text-slate-500 font-medium">From bottleneck to solution in three intelligent steps.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "1. Define your bottleneck",
+                  desc: "Instead of searching for tool names, describe the problem. 'I spend too much time subtitling videos' or 'I need to automate cold emails.'",
+                  icon: <SearchIcon className="w-6 h-6" />
+                },
+                {
+                  title: "2. Intelligent Matching",
+                  desc: "Our engine uses Gemini & Google Search Grounding to find real-time, proven AI solutions that specifically address your unique input.",
+                  icon: <SparklesIcon className="w-6 h-6" />
+                },
+                {
+                  title: "3. Blueprint Execution",
+                  desc: "Choose a tool and get an instant execution plan: exactly what to click, what to upload, and a custom prompt to get the job done.",
+                  icon: <ArrowRightIcon className="w-6 h-6" />
+                }
+              ].map((step, i) => (
+                <div key={i} className="p-8 bg-white border border-slate-100 rounded-[32px] hover:shadow-xl transition-all duration-300">
+                  <div className="w-12 h-12 bg-indigo-50 text-[#5D5CDE] rounded-2xl flex items-center justify-center mb-6">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-4">{step.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed font-medium">{step.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-20 text-center">
+              <button 
+                onClick={() => switchView('search')}
+                className="px-10 py-4 bg-[#5D5CDE] text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-500/30 hover:scale-105 transition-all"
+              >
+                Try it now
+              </button>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="py-20 border-t border-slate-100 bg-white mt-40">

@@ -26,6 +26,17 @@ export interface ToolResponse {
   recommendations: ToolRecommendation[];
 }
 
+export interface FeedPost {
+  id: string;
+  title: string;
+  content: string;
+  type: 'workflow' | 'automation' | 'announcement';
+  created_at: string;
+  likes_count?: number;
+  is_liked?: boolean;
+  metadata?: any; // For storing workflow/tool specific data if needed
+}
+
 export interface SearchState {
   query: string;
   loading: boolean;
