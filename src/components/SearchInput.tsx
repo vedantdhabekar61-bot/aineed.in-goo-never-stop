@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useEffect, useRef } from 'react';
 import { SearchIcon } from './Icons';
 
 interface SearchInputProps {
@@ -9,15 +9,27 @@ interface SearchInputProps {
   onShowAuth: () => void;
   isLoading: boolean;
   user: any | null;
+  isSticky?: boolean;
+  onFocusChange?: (isFocused: boolean) => void;
 }
 
-const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoading, user }) => {
+const SearchInput: React.FC<SearchInputProps> = ({ 
+  onSearch, 
+  onShowAuth, 
+  isLoading, 
+  user, 
+  isSticky = false,
+  onFocusChange 
+}) => {
   const [value, setValue] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       if (value.trim() && !isLoading) {
         onSearch(value.trim());
+        inputRef.current?.blur();
       }
     }
   };
@@ -25,27 +37,56 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoadi
   const handleAction = () => {
     if (value.trim() && !isLoading) {
       onSearch(value.trim());
+      inputRef.current?.blur();
     }
   };
 
+  const handleFocus = () => {
+    setIsFocused(true);
+    onFocusChange?.(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    onFocusChange?.(false);
+  };
+
   return (
-    <div className="w-full max-w-[850px] mx-auto relative z-20 group">
+    <div className={`
+      w-full transition-all duration-700 ease-out z-[60]
+      ${isSticky ? 'max-w-xl' : 'max-w-[850px]'} 
+      mx-auto relative group
+    `}>
       <div className={`
-        relative flex items-center bg-white/60 backdrop-blur-2xl rounded-2xl 
-        shadow-[0_20px_50px_rgba(0,0,0,0.06),inset_0_1px_0_0_rgba(255,255,255,0.8)] 
-        border border-slate-200/60 transition-all duration-500 p-2 
-        hover:border-primary/40 focus-within:border-primary focus-within:shadow-glow focus-within:scale-[1.01]
+        relative flex items-center bg-white/70 backdrop-blur-2xl rounded-2xl 
+        border transition-all duration-500 overflow-hidden
+        ${isSticky ? 'p-1.5 shadow-premium' : 'p-2 shadow-soft'}
+        ${isFocused 
+          ? 'border-primary ring-4 ring-primary/10 shadow-glow scale-[1.02]' 
+          : 'border-slate-200/60 hover:border-primary/40'
+        }
       `}>
-        <div className="pl-6 pointer-events-none opacity-40 group-focus-within:opacity-100 transition-opacity">
-          <SearchIcon className="w-6 h-6 text-slate-400 group-focus-within:text-primary" />
+        <div className={`
+          pl-5 pointer-events-none transition-all duration-300
+          ${isFocused ? 'opacity-100 scale-110' : 'opacity-40'}
+        `}>
+          <SearchIcon className={`w-6 h-6 ${isFocused ? 'text-primary' : 'text-slate-400'}`} />
         </div>
+        
         <input
+          ref={inputRef}
           type="text"
-          className="w-full bg-transparent text-slate-900 p-4 pl-4 focus:outline-none placeholder-slate-400 text-lg font-medium tracking-wide"
-          placeholder="e.g., Automate LinkedIn networking for my SaaS..."
+          className={`
+            w-full bg-transparent text-slate-900 p-4 pl-3 focus:outline-none 
+            placeholder-slate-400 font-medium tracking-wide transition-all
+            ${isSticky ? 'text-sm' : 'text-lg'}
+          `}
+          placeholder={isSticky ? "Search AI..." : "e.g., Automate LinkedIn networking for my SaaS..."}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           disabled={isLoading}
         />
         
@@ -53,9 +94,10 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoadi
           onClick={handleAction}
           disabled={isLoading || !value.trim()}
           className={`
-            flex items-center space-x-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 shrink-0
+            flex items-center space-x-2 rounded-xl font-bold transition-all duration-300 shrink-0
+            ${isSticky ? 'px-5 py-2.5 text-xs' : 'px-8 py-4'}
             ${value.trim() && !isLoading 
-                ? 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/10 hover:shadow-primary/30' 
+                ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-lg active:scale-95' 
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
             }
           `}
@@ -63,13 +105,17 @@ const SearchInput: React.FC<SearchInputProps> = ({ onSearch, onShowAuth, isLoadi
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           ) : (
-            <span>Find AI</span>
+            <span>{isSticky ? 'Find' : 'Find AI'}</span>
           )}
         </button>
       </div>
-      {!user && (
-        <p className="text-center mt-5 text-[13px] text-slate-400 font-medium tracking-wider uppercase">
-          ✨ <span className="text-slate-400 font-bold">Limited:</span> 2 free intelligent searches for guests
+      
+      {!isSticky && !user && (
+        <p className={`
+          text-center mt-5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500
+          ${isFocused ? 'text-primary animate-pulse' : 'text-slate-400'}
+        `}>
+          ✨ Limited: 2 free intelligent searches for guests
         </p>
       )}
     </div>

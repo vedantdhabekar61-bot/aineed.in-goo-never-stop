@@ -39,6 +39,8 @@ export default function Page() {
   const [activeView, setActiveView] = useState<AppView>('search');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
+  const [isStickySearch, setIsStickySearch] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ToolRecommendation[] | null>(null);
@@ -55,6 +57,7 @@ export default function Page() {
   const [isWorkflowLoading, setIsWorkflowLoading] = useState(false);
   const [activeWorkflowTool, setActiveWorkflowTool] = useState<ToolRecommendation | null>(null);
   const workflowRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   const [promptIndex, setPromptIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
@@ -73,7 +76,18 @@ export default function Page() {
       else setSavedTools([]);
     });
 
-    return () => subscription.unsubscribe();
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const heroBottom = heroRef.current.offsetTop + heroRef.current.offsetHeight - 200;
+        setIsStickySearch(window.scrollY > heroBottom);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -199,21 +213,46 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-primary selection:text-white relative">
+    <div className={`min-h-screen bg-white text-slate-800 font-sans transition-all duration-700 relative`}>
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+
+      {/* Cinematic Overlay */}
+      <div className={`
+        fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[55] pointer-events-none transition-opacity duration-700
+        ${isFocused ? 'opacity-100' : 'opacity-0'}
+      `} />
 
       {/* Floating Island Nav */}
       <div className="fixed top-6 inset-x-0 z-[50] flex justify-center px-4">
-        <nav className="w-full max-w-5xl bg-white/70 backdrop-blur-2xl border border-slate-200/50 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-300">
+        <nav className={`
+          w-full max-w-5xl bg-white/70 backdrop-blur-2xl border border-slate-200/50 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-500
+          ${isStickySearch ? 'scale-[0.98]' : ''}
+        `}>
           <div className="flex items-center gap-10">
-            <div className="flex items-center gap-3 cursor-pointer group" onClick={() => switchView('search')}>
+            <div className={`flex items-center gap-3 cursor-pointer group transition-all duration-500 ${isStickySearch ? 'scale-90 opacity-0 -translate-x-10 pointer-events-none' : ''}`} onClick={() => switchView('search')}>
               <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-glow group-hover:rotate-12 transition-all duration-500">
                 <SparklesIcon className="w-5 h-5" />
               </div>
               <span className="text-xl font-black tracking-tighter text-slate-900 hidden sm:inline-block">aineed.in</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Sticky Search bar morph position */}
+            <div className={`absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-500 ${isStickySearch ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}`}>
+               <div className="w-full max-w-lg pointer-events-auto">
+                 {isStickySearch && (
+                    <SearchInput 
+                      onSearch={handleSearch} 
+                      onShowAuth={() => setIsAuthModalOpen(true)}
+                      isLoading={loading} 
+                      user={user}
+                      isSticky={true}
+                      onFocusChange={setIsFocused}
+                    />
+                 )}
+               </div>
+            </div>
+
+            <div className={`flex items-center gap-2 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
               <button 
                 onClick={() => switchView('search')}
                 className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'search' ? 'text-slate-900 bg-slate-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
@@ -232,22 +271,10 @@ export default function Page() {
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-glow" />
                 )}
               </button>
-              {user && (
-                <button 
-                  onClick={() => switchView('feed')}
-                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'text-primary bg-primary/5' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
-                >
-                  <NewspaperIcon className="w-4 h-4" />
-                  Pulse
-                  {activeView === 'feed' && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-glow" />
-                  )}
-                </button>
-              )}
             </div>
           </div>
 
-          <div className="flex items-center space-x-5">
+          <div className={`flex items-center space-x-5 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="relative p-2.5 text-slate-400 hover:text-primary transition-all duration-300 hover:bg-primary/5 rounded-xl"
@@ -275,7 +302,7 @@ export default function Page() {
       </div>
 
       {/* Toolkit Sidebar */}
-      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-premium z-[60] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-premium z-[70] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-8 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-xl font-bold flex items-center gap-3 text-slate-900">
@@ -318,11 +345,12 @@ export default function Page() {
         </div>
       </div>
 
-      <main className="container mx-auto px-6 pt-40 pb-32 flex flex-col items-center">
+      {/* Optical Center Alignment Container */}
+      <main className="container mx-auto px-6 pt-32 pb-32 flex flex-col items-center">
         {activeView === 'search' && (
           <div className="w-full flex flex-col items-center animate-in fade-in duration-1000">
-            {/* Hero Section */}
-            <div className="relative w-full max-w-4xl flex flex-col items-center">
+            {/* Hero Section - Reduced pt for Optical Center */}
+            <div ref={heroRef} className="relative w-full max-w-4xl flex flex-col items-center pt-10">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] hero-glow pointer-events-none -z-10" />
 
               <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
@@ -344,20 +372,24 @@ export default function Page() {
                   <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">Find the exact AI.</span>
                 </h1>
 
-                <div className="h-14 flex items-center justify-center mb-12 overflow-hidden">
+                <div className="h-14 flex items-center justify-center mb-10 overflow-hidden">
                   <p className="text-xl md:text-2xl text-slate-400 font-medium tracking-wide">
                     Try: <span className="text-primary border-r-2 border-primary/30 pr-2 animate-pulse font-bold">{currentText}</span>
                   </p>
                 </div>
 
-                <SearchInput 
-                  onSearch={handleSearch} 
-                  onShowAuth={() => setIsAuthModalOpen(true)}
-                  isLoading={loading} 
-                  user={user}
-                />
+                {/* Main Search Bar in Hero */}
+                <div className={`transition-all duration-500 ${isStickySearch ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+                  <SearchInput 
+                    onSearch={handleSearch} 
+                    onShowAuth={() => setIsAuthModalOpen(true)}
+                    isLoading={loading} 
+                    user={user}
+                    onFocusChange={setIsFocused}
+                  />
+                </div>
 
-                <div className="mt-20 w-full">
+                <div className={`mt-20 w-full transition-opacity duration-500 ${isStickySearch ? 'opacity-0' : 'opacity-100'}`}>
                   <div className="mb-8 flex items-center justify-center gap-4">
                     <div className="h-px w-16 bg-slate-100" />
                     <span className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Curated Categories</span>
@@ -494,7 +526,7 @@ export default function Page() {
       {/* Pulse Feed FAB */}
       <button 
         onClick={() => switchView('feed')}
-        className="fixed bottom-10 right-10 z-50 w-20 h-20 bg-white border border-slate-200 hover:border-primary/50 text-slate-900 rounded-3xl shadow-premium flex items-center justify-center transition-all duration-500 hover:scale-110 hover:-rotate-3 active:scale-95 group overflow-hidden"
+        className="fixed bottom-10 right-10 z-[65] w-20 h-20 bg-white border border-slate-200 hover:border-primary/50 text-slate-900 rounded-3xl shadow-premium flex items-center justify-center transition-all duration-500 hover:scale-110 hover:-rotate-3 active:scale-95 group overflow-hidden"
         title="AI Feed"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
