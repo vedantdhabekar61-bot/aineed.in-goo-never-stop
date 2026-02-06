@@ -274,7 +274,19 @@ export default function Page() {
             </div>
           </div>
 
-          <div className={`flex items-center space-x-5 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
+          <div className={`flex items-center space-x-3 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
+            
+            {/* Start with Google button - now in Navigation Bar */}
+            {!user && !authChecking && (
+              <button 
+                onClick={handleGoogleAuthAction}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-primary/40 rounded-xl text-[12px] font-bold text-slate-600 hover:text-primary transition-all group"
+              >
+                <GoogleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span>Start with Google</span>
+              </button>
+            )}
+
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="relative p-2.5 text-slate-400 hover:text-primary transition-all duration-300 hover:bg-primary/5 rounded-xl"
@@ -282,6 +294,7 @@ export default function Page() {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
               {savedTools.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>}
             </button>
+            
             {user ? (
               <div className="flex items-center gap-3">
                 <button onClick={() => (supabase.auth as any).signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">Sign Out</button>
@@ -292,7 +305,7 @@ export default function Page() {
             ) : !authChecking ? (
               <button 
                 onClick={() => setIsAuthModalOpen(true)} 
-                className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 transition-all shadow-glow active:scale-95"
+                className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-slate-800 transition-all shadow-glow active:scale-95"
               >
                 Sign Up
               </button>
@@ -355,18 +368,6 @@ export default function Page() {
 
               <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
                 
-                {/* Start with the Google button */}
-                {!user && !loading && !results && (
-                  <button 
-                    onClick={handleGoogleAuthAction}
-                    className="inline-flex items-center gap-3 px-8 py-3.5 mb-12 bg-white border border-slate-200 hover:border-primary/40 rounded-full text-sm font-bold text-slate-600 hover:text-primary shadow-soft hover:shadow-glow transition-all duration-500 group animate-in slide-in-from-top-4"
-                  >
-                    <GoogleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    Start with Google
-                    <ArrowRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                )}
-
                 <h1 className="text-6xl md:text-8xl font-black mb-10 leading-[1.05] tracking-tight text-slate-900 drop-shadow-sm">
                   Fix your bottlenecks. <br/>
                   <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">Find the exact AI.</span>
