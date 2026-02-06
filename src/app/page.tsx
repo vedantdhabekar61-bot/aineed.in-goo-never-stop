@@ -3,8 +3,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-// Use type import and optional any to handle missing exports in some environments
-import type { User } from '@supabase/supabase-js';
 import { ToolRecommendation, GroundingSource, WorkflowPlan } from '../types';
 import SearchInput from '../components/SearchInput';
 import ResultCard from '../components/ResultCard';
@@ -37,7 +35,6 @@ const PROMPTS = [
 type AppView = 'search' | 'feed' | 'how-it-works';
 
 export default function Page() {
-  // Use any to avoid "no exported member 'User'" error if the import fails
   const [user, setUser] = useState<any | null>(null);
   const [activeView, setActiveView] = useState<AppView>('search');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -64,14 +61,12 @@ export default function Page() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    // Cast supabase.auth to any to bypass "Property 'getSession' does not exist" type errors
     (supabase.auth as any).getSession().then(({ data: { session } }: any) => {
       setUser(session?.user ?? null);
       setAuthChecking(false);
       if (session?.user) fetchSavedTools(session.user.id);
     });
 
-    // Cast supabase.auth to any to bypass "Property 'onAuthStateChange' does not exist" type errors
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) fetchSavedTools(session.user.id);
@@ -191,7 +186,6 @@ export default function Page() {
 
   const handleGoogleAuthAction = async () => {
     try {
-      // Cast supabase.auth to any to bypass "Property 'signInWithOAuth' does not exist" type errors
       const { error } = await (supabase.auth as any).signInWithOAuth({
         provider: 'google',
         options: {
@@ -263,7 +257,6 @@ export default function Page() {
             </button>
             {user ? (
               <div className="flex items-center gap-3">
-                {/* Cast supabase.auth to any to bypass "Property 'signOut' does not exist" type errors */}
                 <button onClick={() => (supabase.auth as any).signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">Sign Out</button>
                 <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs uppercase shadow-sm">
                   {user.email?.charAt(0)}
@@ -334,7 +327,7 @@ export default function Page() {
 
               <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
                 
-                {/* Google Sign-in Landing Button */}
+                {/* Start with the Google button */}
                 {!user && !loading && !results && (
                   <button 
                     onClick={handleGoogleAuthAction}

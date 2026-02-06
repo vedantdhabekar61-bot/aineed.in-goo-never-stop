@@ -1,9 +1,9 @@
-
 import React from "react";
-import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 
-export const metadata: Metadata = {
+// Removed Metadata type annotation to fix: Module '"next"' has no exported member 'Metadata'.
+// Next.js correctly infers the type for the conventional 'metadata' export in App Router.
+export const metadata = {
   title: "aineed.in - Find the AI you need",
   description: "Describe your workflow bottleneck, and our AI engine will match you with the perfect tools to solve it.",
 };
@@ -40,7 +40,7 @@ export default function RootLayout({
                   },
                   boxShadow: {
                     'glass': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)',
-                    'glow': '0 10px 40px -10px rgba(139, 92, 246, 0.2)',
+                    'glow': '0 10px 40px -10px rgba(139, 92, 246, 0.3)',
                     'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.04)',
                     'card': '0 10px 30px -5px rgba(0, 0, 0, 0.03)',
                     'premium': '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
@@ -86,7 +86,7 @@ export default function RootLayout({
           }
           
           .hero-glow {
-            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 60%);
           }
 
           .animate-float {
