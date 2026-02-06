@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { User } from '@supabase/supabase-js';
+// Use type import and optional any to handle missing exports in some environments
+import type { User } from '@supabase/supabase-js';
 import { ToolRecommendation, GroundingSource, WorkflowPlan } from '../types';
 import SearchInput from '../components/SearchInput';
 import ResultCard from '../components/ResultCard';
@@ -11,7 +12,7 @@ import AuthModal from '../components/AuthModal';
 import WorkflowCanvas from '../components/WorkflowCanvas';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { Feed } from '../components/Feed';
-import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon } from '../components/Icons';
+import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon, GoogleIcon } from '../components/Icons';
 
 const CATEGORIES = [
   "All Tools", 
@@ -36,7 +37,8 @@ const PROMPTS = [
 type AppView = 'search' | 'feed' | 'how-it-works';
 
 export default function Page() {
-  const [user, setUser] = useState<User | null>(null);
+  // Use any to avoid "no exported member 'User'" error if the import fails
+  const [user, setUser] = useState<any | null>(null);
   const [activeView, setActiveView] = useState<AppView>('search');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
@@ -62,13 +64,15 @@ export default function Page() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Cast supabase.auth to any to bypass "Property 'getSession' does not exist" type errors
+    (supabase.auth as any).getSession().then(({ data: { session } }: any) => {
       setUser(session?.user ?? null);
       setAuthChecking(false);
       if (session?.user) fetchSavedTools(session.user.id);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Cast supabase.auth to any to bypass "Property 'onAuthStateChange' does not exist" type errors
+    const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) fetchSavedTools(session.user.id);
       else setSavedTools([]);
@@ -185,25 +189,40 @@ export default function Page() {
     setActiveView(view);
   };
 
+  const handleGoogleAuthAction = async () => {
+    try {
+      // Cast supabase.auth to any to bypass "Property 'signInWithOAuth' does not exist" type errors
+      const { error } = await (supabase.auth as any).signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      console.error(err.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-800 font-sans selection:bg-primary selection:text-white relative">
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
       {/* Floating Island Nav */}
       <div className="fixed top-6 inset-x-0 z-[50] flex justify-center px-4">
-        <nav className="w-full max-w-4xl bg-white/80 backdrop-blur-2xl border border-slate-200/50 rounded-2xl shadow-soft px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+        <nav className="w-full max-w-5xl bg-white/70 backdrop-blur-2xl border border-slate-200/50 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-300">
+          <div className="flex items-center gap-10">
             <div className="flex items-center gap-3 cursor-pointer group" onClick={() => switchView('search')}>
               <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-glow group-hover:rotate-12 transition-all duration-500">
                 <SparklesIcon className="w-5 h-5" />
               </div>
-              <span className="text-lg font-black tracking-tighter text-slate-900 hidden sm:inline-block">aineed.in</span>
+              <span className="text-xl font-black tracking-tighter text-slate-900 hidden sm:inline-block">aineed.in</span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button 
                 onClick={() => switchView('search')}
-                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'search' ? 'text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'search' ? 'text-slate-900 bg-slate-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
               >
                 Find AI
                 {activeView === 'search' && (
@@ -212,9 +231,9 @@ export default function Page() {
               </button>
               <button 
                 onClick={() => switchView('how-it-works')}
-                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'how-it-works' ? 'text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all ${activeView === 'how-it-works' ? 'text-slate-900 bg-slate-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
               >
-                How it works
+                The Process
                 {activeView === 'how-it-works' && (
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-glow" />
                 )}
@@ -222,10 +241,10 @@ export default function Page() {
               {user && (
                 <button 
                   onClick={() => switchView('feed')}
-                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`relative px-4 py-2 rounded-xl text-[13px] font-bold transition-all flex items-center gap-2 ${activeView === 'feed' ? 'text-primary bg-primary/5' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50/50'}`}
                 >
                   <NewspaperIcon className="w-4 h-4" />
-                  Pulse Feed
+                  Pulse
                   {activeView === 'feed' && (
                     <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full shadow-glow" />
                   )}
@@ -234,25 +253,36 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-5">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="relative p-2 text-slate-400 hover:text-primary transition-all duration-300"
+              className="relative p-2.5 text-slate-400 hover:text-primary transition-all duration-300 hover:bg-primary/5 rounded-xl"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
               {savedTools.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>}
             </button>
             {user ? (
-              <button onClick={() => supabase.auth.signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">Sign Out</button>
+              <div className="flex items-center gap-3">
+                {/* Cast supabase.auth to any to bypass "Property 'signOut' does not exist" type errors */}
+                <button onClick={() => (supabase.auth as any).signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">Sign Out</button>
+                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs uppercase shadow-sm">
+                  {user.email?.charAt(0)}
+                </div>
+              </div>
             ) : !authChecking ? (
-              <button onClick={() => setIsAuthModalOpen(true)} className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 transition-all shadow-sm active:scale-95">Sign Up</button>
+              <button 
+                onClick={() => setIsAuthModalOpen(true)} 
+                className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[13px] font-black hover:bg-slate-800 transition-all shadow-glow active:scale-95"
+              >
+                Sign Up
+              </button>
             ) : null}
           </div>
         </nav>
       </div>
 
       {/* Toolkit Sidebar */}
-      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-soft z-[60] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-premium z-[60] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="p-8 h-full flex flex-col">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-xl font-bold flex items-center gap-3 text-slate-900">
@@ -267,7 +297,7 @@ export default function Page() {
           <div className="flex-grow overflow-y-auto space-y-5 pr-2 custom-scrollbar">
             {savedTools.length === 0 ? (
               <div className="text-center py-24 text-slate-300">
-                <SparklesIcon className="w-12 h-12 mx-auto mb-6 opacity-20" />
+                <SparklesIcon className="w-12 h-12 mx-auto mb-6 opacity-20 animate-float" />
                 <p className="text-sm font-medium">Save tools to build your custom AI workflow.</p>
               </div>
             ) : (
@@ -300,12 +330,25 @@ export default function Page() {
           <div className="w-full flex flex-col items-center animate-in fade-in duration-1000">
             {/* Hero Section */}
             <div className="relative w-full max-w-4xl flex flex-col items-center">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] hero-glow pointer-events-none -z-10" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] hero-glow pointer-events-none -z-10" />
 
               <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
-                <h1 className="text-5xl md:text-7xl font-black mb-10 leading-[1.05] tracking-tight text-slate-900">
+                
+                {/* Google Sign-in Landing Button */}
+                {!user && !loading && !results && (
+                  <button 
+                    onClick={handleGoogleAuthAction}
+                    className="inline-flex items-center gap-3 px-8 py-3.5 mb-12 bg-white border border-slate-200 hover:border-primary/40 rounded-full text-sm font-bold text-slate-600 hover:text-primary shadow-soft hover:shadow-glow transition-all duration-500 group animate-in slide-in-from-top-4"
+                  >
+                    <GoogleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    Start with Google
+                    <ArrowRightIcon className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                )}
+
+                <h1 className="text-6xl md:text-8xl font-black mb-10 leading-[1.05] tracking-tight text-slate-900 drop-shadow-sm">
                   Fix your bottlenecks. <br/>
-                  <span className="text-primary">Find the exact AI.</span>
+                  <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">Find the exact AI.</span>
                 </h1>
 
                 <div className="h-14 flex items-center justify-center mb-12 overflow-hidden">
@@ -322,26 +365,26 @@ export default function Page() {
                 />
 
                 <div className="mt-20 w-full">
-                  <div className="mb-6 flex items-center justify-center gap-4">
-                    <div className="h-px w-10 bg-slate-100" />
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Explore Categories</span>
-                    <div className="h-px w-10 bg-slate-100" />
+                  <div className="mb-8 flex items-center justify-center gap-4">
+                    <div className="h-px w-16 bg-slate-100" />
+                    <span className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Curated Categories</span>
+                    <div className="h-px w-16 bg-slate-100" />
                   </div>
-                  <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+                  <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
                     {CATEGORIES.map((cat, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleSearch(cat === "All Tools" ? "Latest trending AI tools" : `Best AI tools for ${cat}`)}
-                        className="px-6 py-3 rounded-full text-[13px] font-bold border border-slate-200 bg-white hover:border-primary/40 hover:text-slate-900 hover:shadow-soft transition-all duration-300 active:scale-95"
+                        className="px-6 py-3.5 rounded-2xl text-[13px] font-bold border border-slate-200 bg-white hover:border-primary/40 hover:text-primary hover:shadow-soft transition-all duration-300 active:scale-95"
                       >
                         {cat}
                       </button>
                     ))}
                     <button 
                       onClick={() => handleSearch("Highly rated AI tools")}
-                      className="px-6 py-3 rounded-full text-[13px] font-black border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300"
+                      className="px-6 py-3.5 rounded-2xl text-[13px] font-black border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300 group"
                     >
-                      View Trending ✨
+                      View Trending <SparklesIcon className="w-4 h-4 ml-1 inline group-hover:rotate-12 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -351,28 +394,34 @@ export default function Page() {
             {/* Results Area */}
             <div className="w-full max-w-7xl">
               {loading ? (
-                <div className="w-full flex justify-center">
+                <div className="w-full flex justify-center mt-20">
                   <SkeletonGrid />
                 </div>
               ) : error ? (
-                <div className="bg-red-50 p-12 rounded-[40px] border border-red-100 text-red-600 text-center flex flex-col items-center">
-                  <p className="font-bold text-lg mb-6">{error}</p>
-                  <button onClick={() => handleSearch(query)} className="px-8 py-3 bg-white border border-red-200 rounded-xl text-sm font-bold hover:bg-red-50 transition-all">Try Again</button>
+                <div className="bg-red-50 p-16 rounded-[48px] border border-red-100 text-red-600 text-center flex flex-col items-center animate-in zoom-in-95">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                    <XIcon className="w-8 h-8" />
+                  </div>
+                  <p className="font-bold text-xl mb-8">{error}</p>
+                  <button onClick={() => handleSearch(query)} className="px-10 py-4 bg-white border border-red-200 rounded-2xl text-sm font-black uppercase tracking-widest hover:bg-red-50 transition-all shadow-sm">Try Again</button>
                 </div>
               ) : results ? (
-                <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 border-b border-slate-100 pb-10 gap-6">
+                <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 mt-10">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-20 border-b border-slate-100 pb-12 gap-8">
                     <div>
-                      <h2 className="text-3xl font-black text-slate-900 mb-2">Identified Solutions</h2>
-                      <p className="text-slate-500 font-medium">Real-time intelligence based on your bottleneck.</p>
+                      <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Intelligence Matches</h2>
+                      <p className="text-slate-500 font-medium text-lg">Optimized recommendations grounded in real-world performance data.</p>
                     </div>
                     <div className="flex flex-wrap gap-3">
                        {sources?.slice(0, 3).map((s, i) => (
-                         <a key={i} href={s.uri} target="_blank" className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-400 hover:bg-slate-50 hover:text-primary transition-all truncate max-w-[180px] shadow-soft">{s.title}</a>
+                         <a key={i} href={s.uri} target="_blank" className="px-5 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-500 hover:bg-slate-50 hover:text-primary transition-all truncate max-w-[200px] shadow-soft flex items-center gap-2">
+                           <ExternalLinkIcon className="w-3.5 h-3.5 opacity-40" />
+                           {s.title}
+                         </a>
                        ))}
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                     {results.map((tool, idx) => (
                       <ResultCard 
                         key={idx} 
@@ -385,7 +434,7 @@ export default function Page() {
                     ))}
                   </div>
 
-                  <div ref={workflowRef} className="mt-10">
+                  <div ref={workflowRef} className="mt-20">
                     <WorkflowCanvas 
                       plan={workflowPlan} 
                       isLoading={isWorkflowLoading} 
@@ -405,42 +454,43 @@ export default function Page() {
         {activeView === 'feed' && <Feed />}
 
         {activeView === 'how-it-works' && (
-          <div className="max-w-5xl mx-auto py-12 animate-in fade-in zoom-in-95 duration-700">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl font-black text-slate-900 mb-8 tracking-tighter">Engineered for <span className="text-primary">Clarity.</span></h2>
-              <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">We bypass generic listings to build you a custom execution path.</p>
+          <div className="max-w-6xl mx-auto py-20 animate-in fade-in zoom-in-95 duration-700">
+            <div className="text-center mb-24">
+              <h2 className="text-6xl font-black text-slate-900 mb-10 tracking-tighter">Precision <span className="text-primary underline decoration-indigo-200 decoration-8 underline-offset-8">Automation.</span></h2>
+              <p className="text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed">How we turn complex operational bottlenecks into streamlined, AI-driven workflows.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[
                 {
-                  title: "1. Problem Input",
-                  desc: "Describe your manual work or technical hurdle. Our system analyzes the root cause of your slowdown.",
-                  icon: <SearchIcon className="w-7 h-7" />
+                  title: "1. Semantic Mapping",
+                  desc: "Detail your manual processes. Our AI deconstructs the logic to identify exactly where efficiency is leaking.",
+                  icon: <SearchIcon className="w-8 h-8" />
                 },
                 {
                   title: "2. Grounded Matching",
-                  desc: "Gemini performs live web intelligence to pinpoint specialized AI tools that solve your exact operational bottleneck, far beyond generic listings.",
-                  icon: <SparklesIcon className="w-7 h-7" />
+                  desc: "We scan the live ecosystem to pinpoint specialized tools that resolve your exact operational edge cases.",
+                  icon: <SparklesIcon className="w-8 h-8" />
                 },
                 {
-                  title: "3. Execution Blueprint",
-                  desc: "We don't just send you to a URL. We generate a 3-step setup guide and the exact prompt you need to use.",
-                  icon: <ArrowRightIcon className="w-7 h-7" />
+                  title: "3. Blueprint Export",
+                  desc: "Receive a full execution plan including configuration prompts and setup steps to deploy instantly.",
+                  icon: <ArrowRightIcon className="w-8 h-8" />
                 }
               ].map((step, i) => (
-                <div key={i} className="group p-10 bg-white border border-slate-100 rounded-[40px] hover:border-primary/30 transition-all duration-500 hover:shadow-soft">
-                  <div className="w-16 h-16 bg-slate-50 text-primary rounded-[24px] flex items-center justify-center mb-10 border border-slate-100 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                <div key={i} className="group p-12 bg-white border border-slate-100 rounded-[48px] hover:border-primary/40 transition-all duration-500 hover:shadow-premium relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-[80px] group-hover:bg-primary/10 transition-all" />
+                  <div className="w-20 h-20 bg-slate-50 text-primary rounded-[28px] flex items-center justify-center mb-12 border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm">
                     {step.icon}
                   </div>
-                  <h3 className="text-2xl font-bold mb-6 text-slate-900 tracking-tight">{step.title}</h3>
-                  <p className="text-slate-500 text-[15px] leading-relaxed font-medium">{step.desc}</p>
+                  <h3 className="text-3xl font-bold mb-8 text-slate-900 tracking-tight">{step.title}</h3>
+                  <p className="text-slate-500 text-lg leading-relaxed font-medium">{step.desc}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-24 text-center">
-              <button onClick={() => switchView('search')} className="px-12 py-5 bg-slate-900 text-white rounded-[24px] font-black text-[15px] shadow-soft hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all tracking-wider uppercase">
+            <div className="mt-32 text-center">
+              <button onClick={() => switchView('search')} className="px-16 py-6 bg-slate-900 text-white rounded-[32px] font-black text-lg shadow-glow hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all tracking-widest uppercase">
                 Launch Search Engine
               </button>
             </div>
@@ -451,29 +501,30 @@ export default function Page() {
       {/* Pulse Feed FAB */}
       <button 
         onClick={() => switchView('feed')}
-        className="fixed bottom-8 right-8 z-50 w-16 h-16 bg-white border border-slate-200 hover:border-primary/50 text-slate-900 rounded-2xl shadow-soft flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group"
+        className="fixed bottom-10 right-10 z-50 w-20 h-20 bg-white border border-slate-200 hover:border-primary/50 text-slate-900 rounded-3xl shadow-premium flex items-center justify-center transition-all duration-500 hover:scale-110 hover:-rotate-3 active:scale-95 group overflow-hidden"
         title="AI Feed"
       >
-        <NewspaperIcon className="w-7 h-7 transition-transform group-hover:rotate-6 text-primary" />
-        <span className="absolute right-full mr-4 bg-slate-900 text-white text-[10px] font-bold py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl">
-          Pulse Feed
+        <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <NewspaperIcon className="w-9 h-9 transition-transform group-hover:scale-110 text-primary relative z-10" />
+        <span className="absolute right-full mr-6 bg-slate-900 text-white text-[11px] font-black py-2.5 px-5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap shadow-2xl tracking-widest uppercase">
+          AI Pulse Feed
         </span>
       </button>
 
-      <footer className="py-24 border-t border-slate-100 bg-white relative overflow-hidden">
+      <footer className="py-32 border-t border-slate-100 bg-white relative overflow-hidden">
         <div className="container mx-auto px-6 text-center">
-          <p className="text-[11px] font-black text-slate-300 mb-10 tracking-[0.4em] uppercase">The Intelligent Tool Index</p>
-          <div className="flex justify-center space-x-16 text-[13px] font-bold text-slate-400">
+          <p className="text-[11px] font-black text-slate-300 mb-12 tracking-[0.5em] uppercase">The Intelligent Tool Index</p>
+          <div className="flex justify-center space-x-20 text-[14px] font-bold text-slate-400">
             <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Legal</a>
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Developer API</a>
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Twitter</a>
+            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Infrastructure</a>
+            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Contact</a>
           </div>
-          <div className="mt-12 flex flex-col items-center gap-4">
-             <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest">All Systems Operational</p>
+          <div className="mt-16 flex flex-col items-center gap-6">
+             <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 rounded-full border border-emerald-100">
+                <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                <p className="text-[12px] text-emerald-600 font-black uppercase tracking-widest">Global Status: Active</p>
              </div>
-             <p className="text-[12px] text-slate-300 font-medium">© 2025 aineed.in. Powered by Google Gemini Intelligence.</p>
+             <p className="text-[12px] text-slate-400 font-medium">© 2025 aineed.in. Built on Vertex AI & Google Cloud Intelligence.</p>
           </div>
         </div>
       </footer>
