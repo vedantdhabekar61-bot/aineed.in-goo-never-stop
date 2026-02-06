@@ -77,6 +77,7 @@ const parseResponse = (text: string): ToolRecommendation[] => {
     }));
   } catch (e) {
     console.error("Parse Error:", e);
-    throw new Error("Could not parse the AI recommendations.");
+    // Fallback if the model returns slightly malformed JSON
+    throw new Error("Could not parse the AI recommendations. Please try a more specific query.");
   }
 };

@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <script 
           async 
@@ -34,13 +34,15 @@ export default function RootLayout({
                   },
                   colors: {
                     primary: '#8B5CF6',
-                    surface: '#050505',
-                    card: '#121214',
-                    border: 'rgba(255, 255, 255, 0.08)',
+                    surface: '#FFFFFF',
+                    card: '#FFFFFF',
+                    border: '#F1F5F9',
                   },
                   boxShadow: {
-                    'glass': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
-                    'glow': '0 0 40px -10px rgba(139, 92, 246, 0.3)',
+                    'glass': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.5)',
+                    'glow': '0 10px 40px -10px rgba(139, 92, 246, 0.15)',
+                    'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.04)',
+                    'card': '0 10px 30px -5px rgba(0, 0, 0, 0.03)',
                   }
                 },
               },
@@ -52,8 +54,8 @@ export default function RootLayout({
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
           
           body {
-            background-color: #050505;
-            color: #E2E8F0;
+            background-color: #FFFFFF;
+            color: #1E293B;
             font-family: 'Plus Jakarta Sans', sans-serif;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
@@ -71,7 +73,7 @@ export default function RootLayout({
             background: transparent;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -79,7 +81,7 @@ export default function RootLayout({
           }
           
           .hero-glow {
-            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
           }
         `}</style>
       </head>
