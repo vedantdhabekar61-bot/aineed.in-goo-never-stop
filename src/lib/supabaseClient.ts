@@ -4,11 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Missing Supabase Environment Variables. Authentication will not work.");
-}
-
+// Use a valid placeholder URL to prevent initialization errors during build or if variables are missing.
 export const supabase = createClient(
-  supabaseUrl || "",
-  supabaseAnonKey || ""
+  supabaseUrl || "https://placeholder-project.supabase.co",
+  supabaseAnonKey || "placeholder-key"
 );

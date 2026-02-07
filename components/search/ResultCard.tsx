@@ -28,7 +28,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onAnalyze }
       
       {tool.reasoning && (
         <div className="mb-10 p-5 bg-primary/5 rounded-2xl border border-primary/10">
-          <p className="text-[13px] text-slate-600 leading-relaxed italic">"{tool.reasoning}"</p>
+          <div className="text-[13px] text-slate-600 leading-relaxed italic">"{tool.reasoning}"</div>
         </div>
       )}
 
@@ -36,7 +36,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onAnalyze }
         <button onClick={onAnalyze} className="w-full py-4 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl transition-all font-bold text-[13px] flex items-center justify-center gap-2">
           Blueprint <ArrowRightIcon />
         </button>
-        <a href={tool.url} target="_blank" className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all font-black text-[13px] flex items-center justify-center gap-2">
+        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all font-black text-[13px] flex items-center justify-center gap-2">
           Launch <ExternalLinkIcon />
         </a>
       </div>

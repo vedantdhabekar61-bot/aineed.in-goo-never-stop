@@ -16,6 +16,7 @@ import { AuthModal } from '../components/auth/AuthModal';
 import { SparklesIcon, NewspaperIcon } from '../components/common/Icons';
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [view, setView] = useState<AppView>('search');
   const [user, setUser] = useState<any>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -34,6 +35,7 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
     const handleScroll = () => {
       if (heroRef.current) setIsSticky(window.scrollY > heroRef.current.offsetHeight + 100);
@@ -86,6 +88,8 @@ export default function Home() {
       setPlanLoading(false);
     }
   };
+
+  if (!mounted) return <div className="min-h-screen bg-white" />;
 
   return (
     <div className="min-h-screen bg-white">

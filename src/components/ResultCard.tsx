@@ -50,10 +50,10 @@ const ResultCard: React.FC<ResultCardProps> = ({ tool, index, onSave, onAnalyze,
       {tool.reasoning && (
         <div className="mb-10 p-5 bg-primary/5 border border-primary/10 rounded-2xl relative overflow-hidden group/logic">
           <div className="absolute top-0 left-0 w-1 h-full bg-primary/50" />
-          <p className="text-[13px] text-slate-600 leading-relaxed tracking-wide">
+          <div className="text-[13px] text-slate-600 leading-relaxed tracking-wide">
             <span className="font-black uppercase tracking-[0.1em] text-[10px] text-primary/70 block mb-2">AI Reasoning</span>
             {tool.reasoning}
-          </p>
+          </div>
         </div>
       )}
       
