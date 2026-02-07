@@ -2,11 +2,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-// Fix: Point to the correct supabaseClient location in src
 import { supabase } from '../src/lib/supabaseClient';
-// Fix: Point to the correct types location in src to resolve the "not a module" error
 import { ToolRecommendation, GroundingSource, WorkflowPlan } from '../src/types';
-// Fix: Point to the correct component locations in src
 import SearchInput from '../src/components/SearchInput';
 import ResultCard from '../src/components/ResultCard';
 import AuthModal from '../src/components/AuthModal';
@@ -279,7 +276,6 @@ export default function Page() {
 
           <div className={`flex items-center space-x-3 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
             
-            {/* Start with Google button - now in Navigation Bar Beside the save tool icon */}
             {!user && !authChecking && (
               <button 
                 onClick={handleGoogleAuthAction}
@@ -317,55 +313,9 @@ export default function Page() {
         </nav>
       </div>
 
-      {/* Toolkit Sidebar */}
-      <div className={`fixed inset-y-0 right-0 w-80 bg-white border-l border-slate-100 shadow-premium z-[70] transition-transform duration-500 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="p-8 h-full flex flex-col">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-xl font-bold flex items-center gap-3 text-slate-900">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-glow" />
-              My AI Toolkit
-            </h2>
-            <button onClick={() => setIsSidebarOpen(false)} className="p-2.5 hover:bg-slate-50 rounded-xl transition-all">
-              <XIcon className="w-5 h-5 text-slate-400" />
-            </button>
-          </div>
-          
-          <div className="flex-grow overflow-y-auto space-y-5 pr-2 custom-scrollbar">
-            {savedTools.length === 0 ? (
-              <div className="text-center py-24 text-slate-300">
-                <SparklesIcon className="w-12 h-12 mx-auto mb-6 opacity-20 animate-float" />
-                <p className="text-sm font-medium">Save tools to build your custom AI workflow.</p>
-              </div>
-            ) : (
-              savedTools.map((tool, i) => (
-                <div key={i} className="p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-white hover:shadow-card transition-all group animate-in slide-in-from-right-4 duration-300" style={{animationDelay: `${i*50}ms`}}>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="font-bold text-sm text-slate-900 truncate max-w-[150px]">{tool.name}</span>
-                    <button onClick={() => handleSaveTool(tool)} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-all p-1">
-                      <XIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <a href={tool.url} target="_blank" className="text-[11px] font-black text-primary hover:text-primary/80 flex items-center tracking-wider uppercase">
-                      Launch <ExternalLinkIcon className="w-2.5 h-2.5 ml-1.5" />
-                    </a>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          
-          <button className="mt-10 w-full py-4 bg-primary text-white rounded-2xl text-[13px] font-black tracking-widest uppercase hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-            Export Toolkit (.csv)
-          </button>
-        </div>
-      </div>
-
-      {/* Optical Center Alignment Container */}
       <main className="container mx-auto px-6 pt-32 pb-32 flex flex-col items-center">
         {activeView === 'search' && (
           <div className="w-full flex flex-col items-center animate-in fade-in duration-1000">
-            {/* Hero Section - Reduced pt for Optical Center */}
             <div ref={heroRef} className="relative w-full max-w-4xl flex flex-col items-center pt-10">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] hero-glow pointer-events-none -z-10" />
 
@@ -382,7 +332,6 @@ export default function Page() {
                   </p>
                 </div>
 
-                {/* Main Search Bar in Hero */}
                 <div className={`transition-all duration-500 ${isStickySearch ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
                   <SearchInput 
                     onSearch={handleSearch} 
@@ -409,18 +358,11 @@ export default function Page() {
                         {cat}
                       </button>
                     ))}
-                    <button 
-                      onClick={() => handleSearch("Highly rated AI tools")}
-                      className="px-6 py-3.5 rounded-2xl text-[13px] font-black border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300 group"
-                    >
-                      View Trending <SparklesIcon className="w-4 h-4 ml-1 inline group-hover:rotate-12 transition-transform" />
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Results Area */}
             <div className="w-full max-w-7xl">
               {loading ? (
                 <div className="w-full flex justify-center mt-20">
@@ -436,20 +378,6 @@ export default function Page() {
                 </div>
               ) : results ? (
                 <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000 mt-10">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-20 border-b border-slate-100 pb-12 gap-8">
-                    <div>
-                      <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Intelligence Matches</h2>
-                      <p className="text-slate-500 font-medium text-lg">Optimized recommendations grounded in real-world performance data.</p>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                       {sources?.slice(0, 3).map((s, i) => (
-                         <a key={i} href={s.uri} target="_blank" className="px-5 py-3 bg-white border border-slate-200 rounded-2xl text-[11px] font-bold text-slate-500 hover:bg-slate-50 hover:text-primary transition-all truncate max-w-[200px] shadow-soft flex items-center gap-2">
-                           <ExternalLinkIcon className="w-3.5 h-3.5 opacity-40" />
-                           {s.title}
-                         </a>
-                       ))}
-                    </div>
-                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                     {results.map((tool, idx) => (
                       <ResultCard 
@@ -462,7 +390,6 @@ export default function Page() {
                       />
                     ))}
                   </div>
-
                   <div ref={workflowRef} className="mt-20">
                     <WorkflowCanvas 
                       plan={workflowPlan} 
@@ -479,84 +406,7 @@ export default function Page() {
             </div>
           </div>
         )}
-
-        {activeView === 'feed' && <Feed />}
-
-        {activeView === 'how-it-works' && (
-          <div className="max-w-6xl mx-auto py-20 animate-in fade-in zoom-in-95 duration-700">
-            <div className="text-center mb-24">
-              <h2 className="text-6xl font-black text-slate-900 mb-10 tracking-tighter">Precision <span className="text-primary underline decoration-indigo-200 decoration-8 underline-offset-8">Automation.</span></h2>
-              <p className="text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed">How we turn complex operational bottlenecks into streamlined, AI-driven workflows.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {[
-                {
-                  title: "1. Semantic Mapping",
-                  desc: "Detail your manual processes. Our AI deconstructs the logic to identify exactly where efficiency is leaking.",
-                  icon: <SearchIcon className="w-8 h-8" />
-                },
-                {
-                  title: "2. Grounded Matching",
-                  desc: "We scan the live ecosystem to pinpoint specialized tools that resolve your exact operational edge cases.",
-                  icon: <SparklesIcon className="w-8 h-8" />
-                },
-                {
-                  title: "3. Blueprint Export",
-                  desc: "Receive a full execution plan including configuration prompts and setup steps to deploy instantly.",
-                  icon: <ArrowRightIcon className="w-8 h-8" />
-                }
-              ].map((step, i) => (
-                <div key={i} className="group p-12 bg-white border border-slate-100 rounded-[48px] hover:border-primary/40 transition-all duration-500 hover:shadow-premium relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-[80px] group-hover:bg-primary/10 transition-all" />
-                  <div className="w-20 h-20 bg-slate-50 text-primary rounded-[28px] flex items-center justify-center mb-12 border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm">
-                    {step.icon}
-                  </div>
-                  <h3 className="text-3xl font-bold mb-8 text-slate-900 tracking-tight">{step.title}</h3>
-                  <p className="text-slate-500 text-lg leading-relaxed font-medium">{step.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-32 text-center">
-              <button onClick={() => switchView('search')} className="px-16 py-6 bg-slate-900 text-white rounded-[32px] font-black text-lg shadow-glow hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all tracking-widest uppercase">
-                Launch Search Engine
-              </button>
-            </div>
-          </div>
-        )}
       </main>
-
-      {/* Pulse Feed FAB */}
-      <button 
-        onClick={() => switchView('feed')}
-        className="fixed bottom-10 right-10 z-[65] w-20 h-20 bg-white border border-slate-200 hover:border-primary/50 text-slate-900 rounded-3xl shadow-premium flex items-center justify-center transition-all duration-500 hover:scale-110 hover:-rotate-3 active:scale-95 group overflow-hidden"
-        title="AI Feed"
-      >
-        <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <NewspaperIcon className="w-9 h-9 transition-transform group-hover:scale-110 text-primary relative z-10" />
-        <span className="absolute right-full mr-6 bg-slate-900 text-white text-[11px] font-black py-2.5 px-5 rounded-2xl opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap shadow-2xl tracking-widest uppercase">
-          AI Pulse Feed
-        </span>
-      </button>
-
-      <footer className="py-32 border-t border-slate-100 bg-white relative overflow-hidden">
-        <div className="container mx-auto px-6 text-center">
-          <p className="text-[11px] font-black text-slate-300 mb-12 tracking-[0.5em] uppercase">The Intelligent Tool Index</p>
-          <div className="flex justify-center space-x-20 text-[14px] font-bold text-slate-400">
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Legal</a>
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Infrastructure</a>
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Contact</a>
-          </div>
-          <div className="mt-16 flex flex-col items-center gap-6">
-             <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 rounded-full border border-emerald-100">
-                <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <p className="text-[12px] text-emerald-600 font-black uppercase tracking-widest">Global Status: Active</p>
-             </div>
-             <p className="text-[12px] text-slate-400 font-medium">© 2025 aineed.in. Built on Vertex AI & Google Cloud Intelligence.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
