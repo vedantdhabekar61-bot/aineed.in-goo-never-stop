@@ -10,6 +10,7 @@ import AuthModal from '../components/AuthModal';
 import WorkflowCanvas from '../components/WorkflowCanvas';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { Feed } from '../components/Feed';
+import { HowItWorks } from '../components/HowItWorks';
 import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon, GoogleIcon } from '../components/Icons';
 
 const CATEGORIES = [
@@ -479,49 +480,8 @@ export default function Page() {
 
         {activeView === 'feed' && <Feed />}
 
-        {activeView === 'how-it-works' && (
-          <div className="max-w-6xl mx-auto py-20 animate-in fade-in zoom-in-95 duration-700">
-            <div className="text-center mb-24">
-              <h2 className="text-6xl font-black text-slate-900 mb-10 tracking-tighter">Precision <span className="text-primary underline decoration-indigo-200 decoration-8 underline-offset-8">Automation.</span></h2>
-              <p className="text-2xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed">How we turn complex operational bottlenecks into streamlined, AI-driven workflows.</p>
-            </div>
+        {activeView === 'how-it-works' && <HowItWorks />}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {[
-                {
-                  title: "1. Semantic Mapping",
-                  desc: "Detail your manual processes. Our AI deconstructs the logic to identify exactly where efficiency is leaking.",
-                  icon: <SearchIcon className="w-8 h-8" />
-                },
-                {
-                  title: "2. Grounded Matching",
-                  desc: "We scan the live ecosystem to pinpoint specialized tools that resolve your exact operational edge cases.",
-                  icon: <SparklesIcon className="w-8 h-8" />
-                },
-                {
-                  title: "3. Blueprint Export",
-                  desc: "Receive a full execution plan including configuration prompts and setup steps to deploy instantly.",
-                  icon: <ArrowRightIcon className="w-8 h-8" />
-                }
-              ].map((step, i) => (
-                <div key={i} className="group p-12 bg-white border border-slate-100 rounded-[48px] hover:border-primary/40 transition-all duration-500 hover:shadow-premium relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-[80px] group-hover:bg-primary/10 transition-all" />
-                  <div className="w-20 h-20 bg-slate-50 text-primary rounded-[28px] flex items-center justify-center mb-12 border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-sm">
-                    {step.icon}
-                  </div>
-                  <h3 className="text-3xl font-bold mb-8 text-slate-900 tracking-tight">{step.title}</h3>
-                  <p className="text-slate-500 text-lg leading-relaxed font-medium">{step.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-32 text-center">
-              <button onClick={() => switchView('search')} className="px-16 py-6 bg-slate-900 text-white rounded-[32px] font-black text-lg shadow-glow hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all tracking-widest uppercase">
-                Launch Search Engine
-              </button>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* Pulse Feed FAB */}
