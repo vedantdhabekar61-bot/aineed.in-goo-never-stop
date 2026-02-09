@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { FeedPost } from '../types';
-import { SparklesIcon, NewspaperIcon, LoaderIcon, ArrowRightIcon } from './Icons';
+import { SparklesIcon, NewspaperIcon, LoaderIcon, StarIcon } from './Icons';
 
 export const Feed: React.FC = () => {
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -19,6 +19,7 @@ export const Feed: React.FC = () => {
     const { data, error } = await supabase
       .from('feed_posts')
       .select('*')
+      .order('is_featured', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false });
     
     if (data) setPosts(data);
@@ -53,24 +54,29 @@ export const Feed: React.FC = () => {
              <p className="text-slate-300 font-bold uppercase tracking-wider text-[10px]">No updates in the pulse yet.</p>
           </div>
         ) : (
-          posts.map((post, idx) => (
+          posts.map((post) => (
             <div key={post.id} className="relative pl-8 group">
-              {/* Dot */}
-              <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 border-primary group-hover:scale-125 transition-transform" />
+              {/* Timeline Dot */}
+              <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-2 transition-transform duration-300 group-hover:scale-125 ${post.is_featured ? 'border-amber-400' : 'border-primary'}`} />
               
-              <div className="mb-1 text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                {new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                <span className={`
+              <div className="mb-1 text-xs font-bold text-slate-400 flex items-center gap-3">
+                {new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                <span className="w-1.5 h-1.5 bg-slate-200 rounded-full" />
+                <span className={`uppercase tracking-widest text-[10px]
                   ${post.type === 'workflow' ? 'text-indigo-500' : ''}
                   ${post.type === 'automation' ? 'text-emerald-500' : ''}
-                  ${post.type === 'announcement' ? 'text-amber-500' : ''}
+                  ${post.type === 'announcement' ? 'text-sky-500' : ''}
                 `}>
                   {post.type}
                 </span>
               </div>
 
-              <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 hover:border-primary/20 transition-all duration-300 shadow-sm hover:shadow-soft">
+              <div className={`relative border rounded-3xl p-6 md:p-8 transition-all duration-300 shadow-sm overflow-hidden ${post.is_featured ? 'bg-amber-50/30 border-amber-200/80 hover:border-amber-400/50' : 'bg-white border-slate-100 hover:border-primary/20 hover:shadow-soft'}`}>
+                 {post.is_featured && (
+                  <div className="absolute top-0 right-0 text-[10px] font-black uppercase tracking-widest bg-amber-300 text-amber-900 px-6 py-1.5 rounded-bl-xl flex items-center gap-2">
+                    <StarIcon className="w-3 h-3" /> Promoted
+                  </div>
+                )}
                 <h3 className="text-xl font-bold text-slate-900 mb-4">{post.title}</h3>
                 <div className="text-slate-600 font-medium leading-relaxed mb-6 whitespace-pre-wrap text-[14px]">
                   {post.content}
@@ -79,17 +85,17 @@ export const Feed: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => handleLike(post.id)}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-red-50 hover:text-red-500 text-slate-500 rounded-xl text-[11px] font-bold transition-all border border-slate-100 hover:border-red-100"
+                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-red-50 hover:text-red-500 text-slate-500 rounded-xl text-[11px] font-bold transition-all border border-slate-200 hover:border-red-100"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     Like
                   </button>
                   <button 
                     onClick={() => navigator.clipboard.writeText(post.content)}
-                    className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-indigo-50 hover:text-primary text-slate-500 rounded-xl text-[11px] font-bold transition-all border border-slate-100 hover:border-indigo-100"
+                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-indigo-50 hover:text-primary text-slate-500 rounded-xl text-[11px] font-bold transition-all border border-slate-200 hover:border-indigo-100"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Copy content
+                    Copy Content
                   </button>
                 </div>
               </div>

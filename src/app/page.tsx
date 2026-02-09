@@ -11,7 +11,10 @@ import WorkflowCanvas from '../components/WorkflowCanvas';
 import { SkeletonGrid } from '../components/SkeletonLoader';
 import { Feed } from '../components/Feed';
 import { HowItWorks } from '../components/HowItWorks';
+import { NewsletterCapture } from '../components/NewsletterCapture';
+import { AdPlaceholder } from '../components/AdPlaceholder';
 import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon, GoogleIcon } from '../components/Icons';
+import Link from 'next/link';
 
 const CATEGORIES = [
   "All Tools", 
@@ -450,14 +453,17 @@ export default function Page() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                     {results.map((tool, idx) => (
-                      <ResultCard 
-                        key={idx} 
-                        tool={tool} 
-                        index={idx} 
-                        onSave={handleSaveTool}
-                        onAnalyze={handleAnalyzeWorkflow}
-                        isSaved={savedTools.some(t => t.name === tool.name)}
-                      />
+                       <React.Fragment key={idx}>
+                        <ResultCard 
+                          tool={tool} 
+                          index={idx} 
+                          onSave={handleSaveTool}
+                          onAnalyze={handleAnalyzeWorkflow}
+                          isSaved={savedTools.some(t => t.name === tool.name)}
+                        />
+                        {/* Inject Ad Placeholder */}
+                        {idx === 2 && <AdPlaceholder />}
+                      </React.Fragment>
                     ))}
                   </div>
 
@@ -483,6 +489,8 @@ export default function Page() {
         {activeView === 'how-it-works' && <HowItWorks />}
 
       </main>
+      
+      <NewsletterCapture />
 
       {/* Pulse Feed FAB */}
       <button 
@@ -500,10 +508,10 @@ export default function Page() {
       <footer className="py-32 border-t border-slate-100 bg-white relative overflow-hidden">
         <div className="container mx-auto px-6 text-center">
           <p className="text-[11px] font-black text-slate-300 mb-12 tracking-[0.5em] uppercase">The Intelligent Tool Index</p>
-          <div className="flex justify-center space-x-20 text-[14px] font-bold text-slate-400">
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Legal</a>
+          <div className="flex justify-center space-x-12 md:space-x-20 text-[14px] font-bold text-slate-400">
+            <Link href="/submit" className="hover:text-primary transition-all duration-300 tracking-wide">Submit a Tool</Link>
             <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Infrastructure</a>
-            <a href="#" className="hover:text-primary transition-all duration-300 tracking-wide">Contact</a>
+            <a href="mailto:contact@aineed.in" className="hover:text-primary transition-all duration-300 tracking-wide">Contact</a>
           </div>
           <div className="mt-16 flex flex-col items-center gap-6">
              <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50 rounded-full border border-emerald-100">
