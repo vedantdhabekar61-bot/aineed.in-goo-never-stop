@@ -39,6 +39,7 @@ const PROMPTS = [
 type AppView = 'search' | 'feed' | 'how-it-works';
 
 export default function Page() {
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any | null>(null);
   const [activeView, setActiveView] = useState<AppView>('search');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -68,6 +69,8 @@ export default function Page() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    
     (supabase.auth as any).getSession().then(({ data: { session } }: any) => {
       setUser(session?.user ?? null);
       setAuthChecking(false);
@@ -215,6 +218,10 @@ export default function Page() {
       console.error(err.message);
     }
   };
+
+  if (!mounted) {
+    return <div className="min-h-screen bg-white" />; // Render nothing or a static loader to prevent hydration mismatch
+  }
 
   return (
     <div className={`min-h-screen bg-white text-slate-800 font-sans transition-all duration-700 relative`}>
