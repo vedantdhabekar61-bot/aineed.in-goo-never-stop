@@ -113,7 +113,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             ) : (
               <>
                 <GoogleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                <span>Start with Google</span>
+                <span>{isSignUp ? "Sign up with Google" : "Sign in with Google"}</span>
               </>
             )}
           </button>

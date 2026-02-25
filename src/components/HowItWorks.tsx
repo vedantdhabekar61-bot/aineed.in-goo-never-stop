@@ -2,7 +2,12 @@
 'use client';
 
 import React from 'react';
-import { SearchIcon, SparklesIcon, ClipboardListIcon } from './Icons';
+import { SearchIcon, SparklesIcon, ClipboardListIcon, GoogleIcon } from './Icons';
+
+interface HowItWorksProps {
+  user?: any;
+  onGoogleAuth?: () => void;
+}
 
 const steps = [
   {
@@ -22,7 +27,7 @@ const steps = [
   },
 ];
 
-export const HowItWorks = () => {
+export const HowItWorks: React.FC<HowItWorksProps> = ({ user, onGoogleAuth }) => {
   return (
     <div className="w-full max-w-7xl mx-auto py-20 animate-in fade-in zoom-in-95 duration-700">
       <div className="text-center mb-20">
@@ -34,7 +39,7 @@ export const HowItWorks = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-20">
         {steps.map((step, index) => (
           <div
             key={step.name}
@@ -53,6 +58,21 @@ export const HowItWorks = () => {
           </div>
         ))}
       </div>
+
+      {!user && onGoogleAuth && (
+        <div className="flex flex-col items-center p-12 bg-slate-50 rounded-[48px] border border-slate-100 text-center">
+          <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">Ready to optimize your workflow?</h3>
+          <p className="text-slate-500 font-medium mb-10 max-w-xl">Join thousands of others using aineed.in to find the perfect AI tools and build custom toolkits.</p>
+          <button 
+            onClick={onGoogleAuth}
+            className="flex items-center gap-3 px-10 py-5 bg-white border border-slate-200 hover:border-primary/50 rounded-2xl text-[15px] font-black text-slate-700 hover:text-primary transition-all shadow-soft hover:shadow-glow group active:scale-95"
+          >
+            <GoogleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            <span>Sign up with Google</span>
+          </button>
+          <p className="mt-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Free forever for individuals • Secure authentication</p>
+        </div>
+      )}
     </div>
   );
 };

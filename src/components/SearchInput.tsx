@@ -112,10 +112,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
       
       {!isSticky && !user && (
         <p className={`
-          text-center mt-5 text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500
-          ${isFocused ? 'text-primary animate-pulse' : 'text-slate-400'}
+          text-center mt-6 text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-500
+          ${isFocused ? 'text-primary' : 'text-slate-400/60'}
         `}>
-          ✨ Limited: 2 free intelligent searches for guests
+          ✨ LIMITED: 2 FREE INTELLIGENT SEARCHES FOR GUESTS
         </p>
       )}
     </div>

@@ -285,42 +285,51 @@ export default function Page() {
             </div>
           </div>
 
-          <div className={`flex items-center space-x-3 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : ''}`}>
+          <div className={`flex items-center space-x-4 transition-all duration-500 ${isStickySearch ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             
-            {/* Start with Google button - now in Navigation Bar */}
             {!user && !authChecking && (
-              <button 
-                onClick={handleGoogleAuthAction}
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-primary/40 rounded-xl text-[12px] font-bold text-slate-600 hover:text-primary transition-all group"
-              >
-                <GoogleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span>Start with Google</span>
-              </button>
+              <>
+                <button 
+                  onClick={handleGoogleAuthAction}
+                  className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-[13px] font-bold text-slate-600 transition-all shadow-sm group"
+                >
+                  <GoogleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span>Start with Google</span>
+                </button>
+
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2 text-slate-400 hover:text-slate-600 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+
+                <button 
+                  onClick={() => setIsAuthModalOpen(true)} 
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[13px] font-bold hover:bg-slate-800 transition-all shadow-sm active:scale-95"
+                >
+                  Sign Up
+                </button>
+              </>
             )}
 
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="relative p-2.5 text-slate-400 hover:text-primary transition-all duration-300 hover:bg-primary/5 rounded-xl"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
-              {savedTools.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>}
-            </button>
-            
-            {user ? (
-              <div className="flex items-center gap-3">
-                <button onClick={() => (supabase.auth as any).signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors px-3 py-2">Sign Out</button>
-                <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs uppercase shadow-sm">
-                  {user.email?.charAt(0)}
+            {user && (
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="relative p-2 text-slate-400 hover:text-primary transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
+                  {savedTools.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>}
+                </button>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => (supabase.auth as any).signOut()} className="text-[12px] font-bold text-slate-400 hover:text-slate-600 transition-colors">Sign Out</button>
+                  <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
+                    {user.email?.charAt(0)}
+                  </div>
                 </div>
               </div>
-            ) : !authChecking ? (
-              <button 
-                onClick={() => setIsAuthModalOpen(true)} 
-                className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-[12px] font-black hover:bg-slate-800 transition-all shadow-glow active:scale-95"
-              >
-                Sign Up
-              </button>
-            ) : null}
+            )}
           </div>
         </nav>
       </div>
@@ -379,14 +388,15 @@ export default function Page() {
 
               <div className={`w-full text-center transition-all duration-1000 ${results ? 'mb-16 scale-[0.98]' : 'mb-32'}`}>
                 
-                <h1 className="text-6xl md:text-8xl font-black mb-10 leading-[1.05] tracking-tight text-slate-900 drop-shadow-sm">
-                  Fix your bottlenecks. <br/>
-                  <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-indigo-500">Find the exact AI.</span>
+                <h1 className="text-6xl md:text-8xl font-black mb-10 leading-[1.05] tracking-tight text-slate-900">
+                  Fix your <br/>
+                  bottlenecks. <br/>
+                  <span className="text-primary">Find the exact AI.</span>
                 </h1>
 
                 <div className="h-14 flex items-center justify-center mb-10 overflow-hidden">
-                  <p className="text-xl md:text-2xl text-slate-400 font-medium tracking-wide">
-                    Try: <span className="text-primary border-r-2 border-primary/30 pr-2 animate-pulse font-bold">{currentText}</span>
+                  <p className="text-xl md:text-2xl text-slate-400/60 font-medium tracking-wide">
+                    Try: <span className="text-primary/80 border-r-2 border-primary/30 pr-2 font-bold">{currentText}</span>
                   </p>
                 </div>
 
@@ -493,7 +503,7 @@ export default function Page() {
 
         {activeView === 'feed' && <Feed />}
 
-        {activeView === 'how-it-works' && <HowItWorks />}
+        {activeView === 'how-it-works' && <HowItWorks user={user} onGoogleAuth={handleGoogleAuthAction} />}
 
       </main>
       

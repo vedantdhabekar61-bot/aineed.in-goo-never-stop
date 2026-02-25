@@ -1,6 +1,13 @@
 
 import React from "react";
 import { Analytics } from "@vercel/analytics/next";
+import { Plus_Jakarta_Sans } from "next/font/google";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-plus-jakarta",
+});
 
 export const metadata = {
   title: "aineed.in - Find the exact AI you need",
@@ -9,7 +16,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={plusJakartaSans.variable}>
       <head>
         <script src="https://cdn.tailwindcss.com"></script>
         <script dangerouslySetInnerHTML={{ __html: `
@@ -27,13 +34,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           };
         `}} />
-        <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-          body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFFFF; color: #1E293B; }
+        <style dangerouslySetInnerHTML={{ __html: `
+          body { font-family: var(--font-plus-jakarta), sans-serif; background-color: #FFFFFF; color: #1E293B; }
           .hero-glow { background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 60%); }
           ::-webkit-scrollbar { width: 5px; }
           ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.2); border-radius: 10px; }
-        `}</style>
+        ` }} />
       </head>
       <body className="antialiased selection:bg-primary selection:text-white">
         {children}

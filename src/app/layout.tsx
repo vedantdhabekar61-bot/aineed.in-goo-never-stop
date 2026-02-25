@@ -54,7 +54,7 @@ export default function RootLayout({
           `,
           }}
         />
-        <style>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
           
           body {
@@ -98,7 +98,7 @@ export default function RootLayout({
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
           }
-        `}</style>
+        ` }} />
       </head>
       <body className="antialiased selection:bg-primary selection:text-white">
         {children}
