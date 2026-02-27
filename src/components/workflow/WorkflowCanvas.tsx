@@ -2,8 +2,8 @@
 'use client';
 
 import React from 'react';
-import { WorkflowPlan, ToolRecommendation } from '../types';
-import { SparklesIcon, LoaderIcon, ArrowRightIcon } from './Icons';
+import { WorkflowPlan, ToolRecommendation } from '../../types';
+import { SparklesIcon, LoaderIcon, ArrowRightIcon } from '../common/Icons';
 
 interface WorkflowCanvasProps {
   plan: WorkflowPlan | null;

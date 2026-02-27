@@ -2,18 +2,18 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { ToolRecommendation, GroundingSource, WorkflowPlan } from '../types';
-import SearchInput from '../components/SearchInput';
-import ResultCard from '../components/ResultCard';
-import AuthModal from '../components/AuthModal';
-import WorkflowCanvas from '../components/WorkflowCanvas';
-import { SkeletonGrid } from '../components/SkeletonLoader';
-import { Feed } from '../components/Feed';
-import { HowItWorks } from '../components/HowItWorks';
-import { NewsletterCapture } from '../components/NewsletterCapture';
-import { AdPlaceholder } from '../components/AdPlaceholder';
-import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon, GoogleIcon } from '../components/Icons';
+import SearchInput from '../components/search/SearchInput';
+import ResultCard from '../components/search/ResultCard';
+import AuthModal from '../components/auth/AuthModal';
+import WorkflowCanvas from '../components/workflow/WorkflowCanvas';
+import { SkeletonGrid } from '../components/common/SkeletonLoader';
+import { Feed } from '../components/feed/Feed';
+import { HowItWorks } from '../components/common/HowItWorks';
+import { NewsletterCapture } from '../components/common/NewsletterCapture';
+import { AdPlaceholder } from '../components/common/AdPlaceholder';
+import { SparklesIcon, NewspaperIcon, XIcon, ExternalLinkIcon, SearchIcon, ArrowRightIcon, GoogleIcon } from '../components/common/Icons';
 import Link from 'next/link';
 
 const CATEGORIES = [
@@ -234,9 +234,9 @@ export default function Page() {
       `} />
 
       {/* Floating Island Nav */}
-      <div className="fixed top-6 inset-x-0 z-[50] flex justify-center px-4">
+      <div className="fixed top-6 inset-x-0 z-[60] flex justify-center px-4">
         <nav className={`
-          w-full max-w-5xl bg-white/70 backdrop-blur-2xl border border-slate-200/50 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-500
+          w-full max-w-5xl bg-white/80 backdrop-blur-2xl border border-slate-200/60 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-500
           ${isStickySearch ? 'scale-[0.98]' : ''}
         `}>
           <div className="flex items-center gap-10">
@@ -291,17 +291,18 @@ export default function Page() {
               <>
                 <button 
                   onClick={handleGoogleAuthAction}
-                  className="hidden md:flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-[13px] font-bold text-slate-600 transition-all shadow-sm group"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-[13px] font-bold text-slate-600 transition-all shadow-sm group"
                 >
                   <GoogleIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  <span>Start with Google</span>
+                  <span className="hidden sm:inline">Start with Google</span>
                 </button>
 
                 <button 
                   onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 text-slate-400 hover:text-slate-600 transition-all"
+                  className="p-2 text-slate-500 hover:text-primary transition-all flex items-center justify-center"
+                  title="My Toolkit"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
 
                 <button 
@@ -317,9 +318,10 @@ export default function Page() {
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setIsSidebarOpen(true)}
-                  className="relative p-2 text-slate-400 hover:text-primary transition-all"
+                  className="relative p-2 text-slate-500 hover:text-primary transition-all flex items-center justify-center"
+                  title="My Toolkit"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"></path></svg>
                   {savedTools.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>}
                 </button>
                 <div className="flex items-center gap-3">

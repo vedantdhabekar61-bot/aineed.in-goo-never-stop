@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { SparklesIcon, StarIcon } from '../../components/Icons';
+import { SparklesIcon, StarIcon } from '../../components/common/Icons';
 import Link from 'next/link';
 
 const PricingTier = ({ title, price, description, features, isFeatured = false }: any) => (

@@ -2,8 +2,8 @@
 'use client';
 
 import React from 'react';
-import { ToolRecommendation } from '../types';
-import { ExternalLinkIcon, SparklesIcon, ArrowRightIcon } from './Icons';
+import { ToolRecommendation } from '../../types';
+import { ExternalLinkIcon, SparklesIcon, ArrowRightIcon } from '../common/Icons';
 
 interface ResultCardProps {
   tool: ToolRecommendation;

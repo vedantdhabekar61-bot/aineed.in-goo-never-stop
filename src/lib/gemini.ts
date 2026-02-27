@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { ToolRecommendation, ToolResponse, GroundingSource } from "../../../types";
+import { ToolRecommendation, ToolResponse, GroundingSource } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 const MODEL_NAME = 'gemini-3-flash-preview';

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, KeyboardEvent, useEffect, useRef } from 'react';
-import { SearchIcon } from './Icons';
+import { SearchIcon } from '../common/Icons';
 
 interface SearchInputProps {
   onSearch: (query: string) => void;

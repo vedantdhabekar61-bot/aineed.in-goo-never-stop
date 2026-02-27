@@ -1,4 +1,4 @@
-import { runGeminiSearch } from "./geminiService";
+import { runGeminiSearch } from "../../../lib/gemini";
 
 export async function POST(req: Request) {
   try {

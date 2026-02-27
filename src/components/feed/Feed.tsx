@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { FeedPost } from '../types';
-import { SparklesIcon, NewspaperIcon, LoaderIcon, StarIcon } from './Icons';
+import { supabase } from '../../lib/supabase';
+import { FeedPost } from '../../types';
+import { SparklesIcon, NewspaperIcon, LoaderIcon, StarIcon } from '../common/Icons';
 
 export const Feed: React.FC = () => {
   const [posts, setPosts] = useState<FeedPost[]>([]);

@@ -1,1 +1,0 @@
-// This file is deleted/deprecated. Use next.config.mjs

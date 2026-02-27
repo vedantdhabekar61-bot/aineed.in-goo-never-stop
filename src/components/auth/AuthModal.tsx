@@ -2,10 +2,8 @@
 'use client';
 
 import React, { useState } from 'react';
-// Fix: Point to the correct supabaseClient location in src
-import { supabase } from '../src/lib/supabaseClient';
-// Fix: Point to the correct component icons in src
-import { XIcon, LoaderIcon, GoogleIcon } from '../src/components/Icons';
+import { supabase } from '../../lib/supabase';
+import { XIcon, LoaderIcon, GoogleIcon } from '../common/Icons';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -31,7 +29,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await (supabase.auth as any).signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://aineed.in/auth/callback',
+          redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
       });
       if (error) throw error;
@@ -115,7 +113,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             ) : (
               <>
                 <GoogleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                <span>Start with Google</span>
+                <span>{isSignUp ? "Sign up with Google" : "Sign in with Google"}</span>
               </>
             )}
           </button>

@@ -34,7 +34,23 @@ export interface FeedPost {
   created_at: string;
   likes_count?: number;
   is_liked?: boolean;
-  metadata?: any;
+  metadata?: any; // For storing workflow/tool specific data if needed
+  is_featured?: boolean;
 }
 
 export type AppView = 'search' | 'feed' | 'how-it-works';
+
+export interface SearchState {
+  query: string;
+  loading: boolean;
+  results: ToolRecommendation[] | null;
+  sources: GroundingSource[] | null;
+  error: string | null;
+}
+
+export enum LoadingStage {
+  IDLE = 'IDLE',
+  SEARCHING = 'SEARCHING',
+  ANALYZING = 'ANALYZING',
+  COMPLETE = 'COMPLETE'
+}
