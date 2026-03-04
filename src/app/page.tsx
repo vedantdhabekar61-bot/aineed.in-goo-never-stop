@@ -236,8 +236,9 @@ export default function Page() {
       {/* Floating Island Nav */}
       <div className="fixed top-6 inset-x-0 z-[60] flex justify-center px-4">
         <nav className={`
-          w-full max-w-5xl bg-white/80 backdrop-blur-2xl border border-slate-200/60 rounded-2xl shadow-premium px-6 h-16 flex items-center justify-between transition-all duration-500
+          w-full max-w-5xl bg-white/80 backdrop-blur-2xl border border-slate-200/60 rounded-2xl px-6 h-16 flex items-center justify-between transition-all duration-500
           ${isStickySearch ? 'scale-[0.98]' : ''}
+          ${isFocused ? 'shadow-none' : 'shadow-premium'}
         `}>
           <div className="flex items-center gap-10">
             <div className={`flex items-center gap-3 cursor-pointer group transition-all duration-500 ${isStickySearch ? 'scale-90 opacity-0 -translate-x-10 pointer-events-none' : ''}`} onClick={() => switchView('search')}>

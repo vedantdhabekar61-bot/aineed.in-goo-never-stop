@@ -56,15 +56,18 @@ const SearchInput: React.FC<SearchInputProps> = ({
       w-full transition-all duration-700 ease-out z-[60]
       ${isSticky ? 'max-w-xl' : 'max-w-[850px]'} 
       mx-auto relative group
+      ${isFocused ? 'scale-[1.02]' : ''}
     `}>
+      <div className={`
+        absolute inset-0 rounded-2xl transition-all duration-500
+        ${isFocused ? 'shadow-glow ring-4 ring-primary/10' : (isSticky ? 'shadow-premium' : 'shadow-soft')}
+      `} />
+      
       <div className={`
         relative flex items-center bg-white/70 backdrop-blur-2xl rounded-2xl 
         border transition-all duration-500 overflow-hidden
-        ${isSticky ? 'p-1.5 shadow-premium' : 'p-2 shadow-soft'}
-        ${isFocused 
-          ? 'border-primary ring-4 ring-primary/10 shadow-glow scale-[1.02]' 
-          : 'border-slate-200/60 hover:border-primary/40'
-        }
+        ${isSticky ? 'p-1.5' : 'p-2'}
+        ${isFocused ? 'border-primary' : 'border-slate-200/60 hover:border-primary/40'}
       `}>
         <div className={`
           pl-5 pointer-events-none transition-all duration-300
